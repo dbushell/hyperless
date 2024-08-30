@@ -1,6 +1,6 @@
 {
   "name": "@dbushell/hyperless",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/dbushell/hyperless.git"
@@ -13,10 +13,8 @@
   "license": "MIT",
   "type": "module",
   "exports": {
-    ".": "./mod.ts",
-    "./types": "./src/types.ts"
+    ".": "./mod.ts"
   },
-  "types": "src/types.ts",
   "files": [
     "src",
     "mod.ts",

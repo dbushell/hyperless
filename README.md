@@ -1,6 +1,6 @@
 # 🧼 Hyperless
 
-Remove the “H” from HTML. Hyperless is a lightweight library for converting HTML to plain text quickly. It removes the “ML” too I guess... HTML to text and other useful stuff. That's the idea.
+Remove the “H” from HTML. Hyperless is a lightweight library for converting HTML to plain text quickly. It removes the “ML” too I guess... HTML to text and other useful stuff. That’s the idea.
 
 ## Functions
 

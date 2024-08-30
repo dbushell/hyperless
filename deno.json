@@ -1,9 +1,8 @@
 {
   "name": "@dbushell/hyperless",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "exports": {
-    ".": "./mod.ts",
-    "./types": "./src/types.ts"
+    ".": "./mod.ts"
   },
   "publish": {
     "include": ["src", "mod.ts", "deno.json", "LICENSE", "README.md"],
