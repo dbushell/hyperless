@@ -1,0 +1,27 @@
+{
+  "name": "@dbushell/hyperless",
+  "version": "0.1.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dbushell/hyperless.git"
+  },
+  "description": "HTML to text and other useful stuff.",
+  "keywords": [
+    "html",
+    "typescript"
+  ],
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    ".": "./mod.ts",
+    "./types": "./src/types.ts"
+  },
+  "types": "src/types.ts",
+  "files": [
+    "src",
+    "mod.ts",
+    "package.json",
+    "LICENSE",
+    "README.md"
+  ]
+}
