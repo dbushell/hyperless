@@ -22,7 +22,7 @@ const removeTags = [
 /**
  * Remove HTML and return text content
  */
-export const stripTags = (html: string) => {
+export const stripTags = (html: string): string => {
   // Find open and close tags
   let match: RegExpMatchArray | null;
   while ((match = html.match(fullTag))) {
