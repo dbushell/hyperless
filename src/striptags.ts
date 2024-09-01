@@ -22,7 +22,7 @@ const removeTags = [
 /**
  * Remove HTML and return text content
  */
-export const stripTags = (html: string): string => {
+export const stripTags = (html: string, depth = 0): string => {
   // Find open and close tags
   let match: RegExpMatchArray | null;
   while ((match = html.match(fullTag))) {
@@ -32,12 +32,14 @@ export const stripTags = (html: string): string => {
       html = html.replace(search, () => '');
       continue;
     }
+    // Wrap quote in alternating typographic style
+    if (['blockquote', 'q'].includes(tag)) {
+      const quotes = depth % 2 ? '‘’' : '“”';
+      const innerText = stripTags(text, depth + 1).trim();
+      text = quotes[0] + innerText + quotes[1];
+    }
     // Remove tags and keep content
     const inline = inlineTags.includes(tag);
-    // Wrap quotes
-    if (['blockquote', 'q'].includes(tag)) {
-      text = `“${stripTags(text).trim()}”`;
-    }
     html = html.replace(search, () => text + (inline ? '' : ' '));
   }
   // Remove everthing else

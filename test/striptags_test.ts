@@ -19,11 +19,17 @@ Deno.test('basic', () => {
 Deno.test('quotes', () => {
   const html = `<blockquote>
   <p><em>This</em> is <abbr="Hypertext Markup Language">HTML</abbr>.</p>
-  <p>With <q>inline quote</q> text.</p>
-  <p>End of content.</p>
 </blockquote>`;
-  const expected =
-    '“This is HTML. \n  With “inline quote” text. \n  End of content.” ';
+  const expected = '“This is HTML.” ';
+  const text = stripTags(html);
+  assertEquals(text, expected);
+});
+
+Deno.test('nested quotes', () => {
+  const html = `<blockquote>
+  <p>Blockquote with <q>inline quote</q> text.</p>
+</blockquote>`;
+  const expected = '“Blockquote with ‘inline quote’ text.” ';
   const text = stripTags(html);
   assertEquals(text, expected);
 });
