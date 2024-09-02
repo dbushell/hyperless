@@ -10,11 +10,25 @@ Remove HTML and return text content with a few niceties.
 
 ```javascript
 import {stripTags} from '@dbushell/hyperless';
-
+// Pass a chunk of HTML
 const text = stripTags('<p>Ceci n’est pas une paragraphe.</p>');
 ```
 
 Text in `<blockquote>` and `<q>` are wrapped in quotation marks.
+
+### `excerpt`
+
+Generate a text excerpt from HTML content.
+
+```javascript
+import {excerpt} from '@dbushell/hyperless';
+// Pass a chunk of HTML
+const text = excerpt(html);
+```
+
+Output is context aware trimmed to the nearest sentence, or word, to fit the maximum length as close as possible.
+
+An optional `maxLength` can be passed as the second argument (default: `300` characters).
 
 * * *
 

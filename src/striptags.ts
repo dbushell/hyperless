@@ -20,7 +20,13 @@ const removeTags = [
 ];
 
 /**
- * Remove HTML and return text content
+ * Remove HTML and return text content with a few niceties.
+ *
+ * Text in `<blockquote>` and `<q>` are wrapped in quotation marks.
+ *
+ * @param html  Original HTML content
+ * @param depth Recursive count (for internal use)
+ * @returns Text with HTML removed
  */
 export const stripTags = (html: string, depth = 0): string => {
   // Find open and close tags
