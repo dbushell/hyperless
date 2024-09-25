@@ -1,5 +1,7 @@
 # 🧼 Hyperless
 
+[![JSR](https://jsr.io/badges/@dbushell/hyperless?labelColor=98e6c8&color=333)](https://jsr.io/@dbushell/hyperless) [![NPM](https://img.shields.io/npm/v/@dbushell/hyperless?labelColor=98e6c8&color=333)](https://www.npmjs.com/package/@dbushell/hyperless)
+
 Remove the “H” from HTML. Hyperless is a lightweight library for converting HTML to plain text quickly. It removes the “ML” too I guess... HTML to text and other useful stuff. That’s the idea.
 
 ## Functions
