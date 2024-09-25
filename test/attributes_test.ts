@@ -1,0 +1,113 @@
+import {parseAttributes} from '../src/attributes.ts';
+import {anyTag} from '../src/regexp.ts';
+import {assertObjectMatch} from 'jsr:@std/assert';
+
+/** Get unparsed attributes from the first HTML tag */
+const getTagAttributes = (html: string): string => {
+  const tagMatch = html.trim().match(new RegExp(anyTag.source, 's'));
+  // Remove trailing self-closing character
+  return tagMatch ? tagMatch[2].replace(/\/\s*?$/, '') : '';
+};
+
+Deno.test('single (pair)', () => {
+  const html = '<div data-test="test123">';
+  const expected = {
+    'data-test': 'test123'
+  };
+  const attr = parseAttributes(getTagAttributes(html));
+  const actual = Object.fromEntries(attr.entries());
+  assertObjectMatch(actual, expected);
+});
+
+Deno.test('single (self-closing)', () => {
+  const html = '<div data-test="test123" />';
+  const expected = {
+    'data-test': 'test123'
+  };
+  const attr = parseAttributes(getTagAttributes(html));
+  const actual = Object.fromEntries(attr.entries());
+  assertObjectMatch(actual, expected);
+});
+
+Deno.test('single (boolean self-closing)', () => {
+  const html = '<div data-test/>';
+  const expected = {
+    'data-test': ''
+  };
+  const attr = parseAttributes(getTagAttributes(html));
+  const actual = Object.fromEntries(attr.entries());
+  assertObjectMatch(actual, expected);
+});
+
+Deno.test('single (boolean)', () => {
+  const html = '<div data-test>';
+  const expected = {
+    'data-test': ''
+  };
+  const attr = parseAttributes(getTagAttributes(html));
+  const actual = Object.fromEntries(attr.entries());
+  assertObjectMatch(actual, expected);
+});
+
+Deno.test('single (unquoted)', () => {
+  const html = '<div data-test=test>';
+  const expected = {
+    'data-test': 'test'
+  };
+  const attr = parseAttributes(getTagAttributes(html));
+  const actual = Object.fromEntries(attr.entries());
+  assertObjectMatch(actual, expected);
+});
+
+Deno.test('duplicate', () => {
+  const html = '<div a="a" b="b" a="A" c="c" A="AA"c>';
+  const expected = {
+    a: 'AA',
+    b: 'b',
+    c: ''
+  };
+  const attr = parseAttributes(getTagAttributes(html));
+  const actual = Object.fromEntries(attr.entries());
+  assertObjectMatch(actual, expected);
+});
+
+Deno.test('multiple (whitespace)', () => {
+  const html = `\u0009 <div a1="1"a2="2"
+    a3="3"\u0009a4="4"a5\u0009a6\u0009=
+    \u0009"6"a7\u0009=7\u0009
+    a8/> `;
+  const expected = {
+    a1: '1',
+    a2: '2',
+    a3: '3',
+    a4: '4',
+    a5: '',
+    a6: '6',
+    a7: '7',
+    a8: ''
+  };
+  const attr = parseAttributes(getTagAttributes(html));
+  const actual = Object.fromEntries(attr.entries());
+  assertObjectMatch(actual, expected);
+});
+
+Deno.test('mixed', () => {
+  const html =
+    '<div data-test="test123"a="\'b\'"c boolean data-2="2" data:3="3" _4=""s1=\'x="1"\'s2="x=\'\u20012\'" data5\u0009data_six=\' 6 \'>';
+  const expected = {
+    'data-test': 'test123',
+    a: "'b'",
+    c: '',
+    boolean: '',
+    'data-2': '2',
+    'data:3': '3',
+    _4: '',
+    s1: 'x="1"',
+    s2: "x='\u20012'",
+    data5: '',
+    data_six: ' 6 '
+  };
+  const attr = parseAttributes(getTagAttributes(html));
+  const actual = Object.fromEntries(attr.entries());
+  assertObjectMatch(actual, expected);
+});

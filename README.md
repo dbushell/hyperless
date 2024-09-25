@@ -16,6 +16,15 @@ const text = stripTags('<p>Ceci n’est pas une paragraphe.</p>');
 
 Text in `<blockquote>` and `<q>` are wrapped in quotation marks.
 
+### `parseAttributes`
+
+Parse an HTML attribute string into a case-insensitive deduplicated key/value map.
+
+```javascript
+import {parseAttributes} from '@dbushell/hyperless';
+const map = parseAttributes('a="1" b="2" c d="d" D="d"');
+```
+
 ### `excerpt`
 
 Generate a text excerpt from HTML content.
