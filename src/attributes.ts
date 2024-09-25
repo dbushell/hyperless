@@ -22,26 +22,28 @@ type STATE =
 /**
  * Return a map of HTML attributes
  * @param attributes HTML tag to parse
- * @returns {Map} Key/value attributes map
+ * @returns Attributes map
  */
-export const parseAttributes = (attributes: string): Map<string, string> => {
+export const parseAttributes = (attributes: string): AttributeMap => {
   const map: AttributeMap = new AttributeMap();
 
   let state: STATE = 'BEFORE_NAME';
   let name = '';
   let value = '';
 
-  parseLoop: for (let i = 0; i < attributes.length; i++) {
+  for (let i = 0; i < attributes.length; i++) {
     const char = attributes[i];
+    // Handle case where closing HTML tag is included to avoid error
+    if (state === 'BEFORE_NAME' || state === 'NAME' || state === 'UNQUOTED') {
+      if (char === '/' || char === '>') {
+        break;
+      }
+    }
     switch (state) {
       case 'BEFORE_NAME':
-        if (char === '/' || char === '>') {
-          break parseLoop;
-        }
         if (ASCII_WHITESPACE.has(char)) {
           continue;
-        }
-        if (INVALID_ATTRIBUTE_NAME.has(char)) {
+        } else if (INVALID_ATTRIBUTE_NAME.has(char)) {
           throw new Error(`Invalid attribute name at character ${i}`);
         }
         name = char;
@@ -49,12 +51,10 @@ export const parseAttributes = (attributes: string): Map<string, string> => {
         state = 'NAME';
         continue;
       case 'NAME':
-        if (char === '/' || char === '>') {
-          break parseLoop;
+        if (char === '=') {
+          state = 'BEFORE_VALUE';
         } else if (ASCII_WHITESPACE.has(char)) {
           state = 'AFTER_NAME';
-        } else if (char === '=') {
-          state = 'BEFORE_VALUE';
         } else if (INVALID_ATTRIBUTE_NAME.has(char)) {
           throw new Error(`invalid name at ${i}`);
         } else {
@@ -62,12 +62,10 @@ export const parseAttributes = (attributes: string): Map<string, string> => {
         }
         continue;
       case 'AFTER_NAME':
-        if (ASCII_WHITESPACE.has(char)) {
-          continue;
-        } else if (char === '=') {
+        if (char === '=') {
           state = 'BEFORE_VALUE';
-        } else {
-          // Found empty attribute
+        } else if (ASCII_WHITESPACE.has(char) === false) {
+          // End of empty attribute
           map.set(name, '');
           // Rewind state to match new name
           i--;
@@ -75,12 +73,12 @@ export const parseAttributes = (attributes: string): Map<string, string> => {
         }
         continue;
       case 'BEFORE_VALUE':
-        if (ASCII_WHITESPACE.has(char)) {
-          continue;
-        } else if (char === "'") {
+        if (char === "'") {
           state = 'SINGLE_QUOTED';
         } else if (char === '"') {
           state = 'DOUBLE_QUOTED';
+        } else if (ASCII_WHITESPACE.has(char)) {
+          continue;
         } else if (INVALID_ATTRIBUTE_VALUE.has(char)) {
           throw new Error(`Invalid unquoted attribute value at character ${i}`);
         } else {
@@ -107,9 +105,7 @@ export const parseAttributes = (attributes: string): Map<string, string> => {
         }
         continue;
       case 'UNQUOTED':
-        if (char === '/' || char === '>') {
-          break parseLoop;
-        } else if (ASCII_WHITESPACE.has(char)) {
+        if (ASCII_WHITESPACE.has(char)) {
           // End of unquoted attribute
           map.set(name, value);
           state = 'BEFORE_NAME';
