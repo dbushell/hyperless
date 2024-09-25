@@ -5,8 +5,7 @@ import {assertObjectMatch} from 'jsr:@std/assert';
 /** Get unparsed attributes from the first HTML tag */
 const getTagAttributes = (html: string): string => {
   const tagMatch = html.trim().match(new RegExp(anyTag.source, 's'));
-  // Remove trailing self-closing character
-  return tagMatch ? tagMatch[2].replace(/\/\s*?$/, '') : '';
+  return tagMatch?.[2] ?? '';
 };
 
 Deno.test('single (pair)', () => {
@@ -40,7 +39,7 @@ Deno.test('single (boolean self-closing)', () => {
 });
 
 Deno.test('single (boolean)', () => {
-  const html = '<div data-test>';
+  const html = '<div data-test/>';
   const expected = {
     'data-test': ''
   };
@@ -50,7 +49,7 @@ Deno.test('single (boolean)', () => {
 });
 
 Deno.test('single (unquoted)', () => {
-  const html = '<div data-test=test>';
+  const html = '<div data-test=test/>';
   const expected = {
     'data-test': 'test'
   };

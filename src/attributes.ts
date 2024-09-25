@@ -31,117 +31,96 @@ export const parseAttributes = (attributes: string): Map<string, string> => {
   let name = '';
   let value = '';
 
-  for (let i = 0; i < attributes.length; i++) {
+  parseLoop: for (let i = 0; i < attributes.length; i++) {
     const char = attributes[i];
-
-    if (state === 'BEFORE_NAME') {
-      if (char === '/' || char === '>') {
-        break;
-      }
-      if (ASCII_WHITESPACE.has(char)) {
+    switch (state) {
+      case 'BEFORE_NAME':
+        if (char === '/' || char === '>') {
+          break parseLoop;
+        }
+        if (ASCII_WHITESPACE.has(char)) {
+          continue;
+        }
+        if (INVALID_ATTRIBUTE_NAME.has(char)) {
+          throw new Error(`Invalid attribute name at character ${i}`);
+        }
+        name = char;
+        value = '';
+        state = 'NAME';
         continue;
-      }
-      if (INVALID_ATTRIBUTE_NAME.has(char)) {
-        throw new Error(`Invalid attribute name at character ${i}`);
-      }
-      name = char;
-      value = '';
-      state = 'NAME';
-      continue;
-    }
-
-    if (state === 'NAME') {
-      if (char === '/' || char === '>') {
-        break;
-      }
-      if (ASCII_WHITESPACE.has(char)) {
-        state = 'AFTER_NAME';
+      case 'NAME':
+        if (char === '/' || char === '>') {
+          break parseLoop;
+        } else if (ASCII_WHITESPACE.has(char)) {
+          state = 'AFTER_NAME';
+        } else if (char === '=') {
+          state = 'BEFORE_VALUE';
+        } else if (INVALID_ATTRIBUTE_NAME.has(char)) {
+          throw new Error(`invalid name at ${i}`);
+        } else {
+          name += char;
+        }
         continue;
-      }
-      if (char === '=') {
-        state = 'BEFORE_VALUE';
+      case 'AFTER_NAME':
+        if (ASCII_WHITESPACE.has(char)) {
+          continue;
+        } else if (char === '=') {
+          state = 'BEFORE_VALUE';
+        } else {
+          // Found empty attribute
+          map.set(name, '');
+          // Rewind state to match new name
+          i--;
+          state = 'BEFORE_NAME';
+        }
         continue;
-      }
-      if (INVALID_ATTRIBUTE_NAME.has(char)) {
-        throw new Error(`invalid name at ${i}`);
-      }
-      name += char;
-      continue;
-    }
-
-    if (state === 'AFTER_NAME') {
-      if (ASCII_WHITESPACE.has(char)) {
+      case 'BEFORE_VALUE':
+        if (ASCII_WHITESPACE.has(char)) {
+          continue;
+        } else if (char === "'") {
+          state = 'SINGLE_QUOTED';
+        } else if (char === '"') {
+          state = 'DOUBLE_QUOTED';
+        } else if (INVALID_ATTRIBUTE_VALUE.has(char)) {
+          throw new Error(`Invalid unquoted attribute value at character ${i}`);
+        } else {
+          value += char;
+          state = 'UNQUOTED';
+        }
         continue;
-      }
-      if (char === '=') {
-        state = 'BEFORE_VALUE';
+      case 'DOUBLE_QUOTED':
+        if (char === '"') {
+          // End of double quoted attribute
+          map.set(name, value);
+          state = 'BEFORE_NAME';
+        } else {
+          value += char;
+        }
         continue;
-      }
-      // Found empty attribute
-      map.set(name, '');
-      // Rewind state in to match new name
-      state = 'BEFORE_NAME';
-      i--;
-      continue;
-    }
-
-    if (state === 'BEFORE_VALUE') {
-      if (ASCII_WHITESPACE.has(char)) {
+      case 'SINGLE_QUOTED':
+        if (char === "'") {
+          // End of single quoted attribute
+          map.set(name, value);
+          state = 'BEFORE_NAME';
+        } else {
+          value += char;
+        }
         continue;
-      }
-      if (char === "'") {
-        state = 'SINGLE_QUOTED';
+      case 'UNQUOTED':
+        if (char === '/' || char === '>') {
+          break parseLoop;
+        } else if (ASCII_WHITESPACE.has(char)) {
+          // End of unquoted attribute
+          map.set(name, value);
+          state = 'BEFORE_NAME';
+        } else if (INVALID_ATTRIBUTE_VALUE.has(char)) {
+          throw new Error(`Invalid unquoted attribute value at character ${i}`);
+        } else {
+          value += char;
+        }
         continue;
-      }
-      if (char === '"') {
-        state = 'DOUBLE_QUOTED';
-        continue;
-      }
-      if (INVALID_ATTRIBUTE_VALUE.has(char)) {
-        throw new Error(`Invalid unquoted attribute value at character ${i}`);
-      }
-      value += char;
-      state = 'UNQUOTED';
-      continue;
-    }
-
-    if (state === 'DOUBLE_QUOTED') {
-      if (char === '"') {
-        // End of double quoted attribute
-        map.set(name, value);
-        state = 'BEFORE_NAME';
-        continue;
-      }
-      value += char;
-      continue;
-    }
-
-    if (state === 'SINGLE_QUOTED') {
-      if (char === "'") {
-        // End of single quoted attribute
-        map.set(name, value);
-        state = 'BEFORE_NAME';
-        continue;
-      }
-      value += char;
-      continue;
-    }
-
-    if (state === 'UNQUOTED') {
-      if (ASCII_WHITESPACE.has(char)) {
-        // End of unquoted attribute
-        map.set(name, value);
-        state = 'BEFORE_NAME';
-        continue;
-      }
-      if (INVALID_ATTRIBUTE_VALUE.has(char)) {
-        throw new Error(`Invalid unquoted attribute value at character ${i}`);
-      }
-      value += char;
-      continue;
     }
   }
-
   // Handle end state
   switch (state) {
     case 'NAME':
