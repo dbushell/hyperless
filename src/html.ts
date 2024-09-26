@@ -56,3 +56,20 @@ export const voidTags = new Set([
   'track',
   'wbr'
 ]);
+
+/**
+ * List of HTML elements to avoid parsing inside
+ */
+export const opaqueTags = new Set([
+  'code',
+  'iframe',
+  'math',
+  'noscript',
+  'object',
+  'pre',
+  'script',
+  'style',
+  'svg',
+  'template',
+  'textarea'
+]);
