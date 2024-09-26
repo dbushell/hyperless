@@ -1,4 +1,4 @@
-import {parseAttributes} from '../src/attributes.ts';
+import {parseAttributes} from '../src/attribute-parser.ts';
 import {anyTag} from '../src/regexp.ts';
 import {assertObjectMatch} from 'jsr:@std/assert';
 

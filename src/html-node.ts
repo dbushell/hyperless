@@ -1,5 +1,5 @@
 import type {AttributeMap} from './attribute-map.ts';
-import {parseAttributes} from './attributes.ts';
+import {parseAttributes} from './attribute-parser.ts';
 import {anyTag} from './regexp.ts';
 
 /** HTML node type */
