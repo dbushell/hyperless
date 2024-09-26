@@ -2,7 +2,7 @@ import type {AttributeMap} from './attribute-map.ts';
 import {parseAttributes} from './attribute-parser.ts';
 import {anyTag} from './regexp.ts';
 
-/** HTML node type */
+/** Node.type values */
 export type NodeType =
   | 'COMMENT'
   | 'ELEMENT'
@@ -11,6 +11,12 @@ export type NodeType =
   | 'STRAY'
   | 'TEXT'
   | 'VOID';
+
+/** Node.render(options) */
+export type NodeRenderOptions = {
+  includeComment?: boolean;
+  includeStray?: boolean;
+};
 
 /**
  * HTML node
@@ -53,5 +59,27 @@ export class Node {
   append(node: Node): this {
     this.children.push(node);
     return this;
+  }
+
+  /** Render node to HTML string */
+  render(options: NodeRenderOptions = {}): string {
+    // Skip comments by default
+    if (this.type === 'COMMENT' && options.includeComment !== true) {
+      return '';
+    }
+    // Skip stray tags by default
+    if (this.type === 'STRAY' && options.includeStray !== true) {
+      return '';
+    }
+    // Render nested children
+    let raw = this.raw;
+    for (const node of this.children) {
+      raw += node.render();
+    }
+    // Close element tags
+    if (this.type === 'ELEMENT') {
+      raw += `</${this.tag}>`;
+    }
+    return raw;
   }
 }

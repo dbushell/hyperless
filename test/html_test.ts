@@ -94,3 +94,22 @@ Deno.test('attributes', () => {
   assertEquals(root.children[0].children[0].raw, 'test');
   assertEquals(root.children[0].attributes.size, 11);
 });
+
+Deno.test('render', () => {
+  const html = `
+<p>Paragraph
+  <b>bold</b>
+  <!-- comment --></p>
+</p>
+<small>&copy;</small>
+`;
+  const render = `
+<p>Paragraph
+  <b>bold</b>
+  </p>
+
+<small>&copy;</small>
+`;
+  const root = parseHTML(html);
+  assertEquals(root.render(), render);
+});
