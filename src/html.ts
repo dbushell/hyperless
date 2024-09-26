@@ -2,7 +2,7 @@
  * Complete list of inline HTML elements
  * {@link https://developer.mozilla.org/en-US/docs/Web/HTML/Element#inline_text_semantics}
  */
-export const inlineTags = new Set([
+export const inlineTags: Set<string> = new Set([
   'a',
   'abbr',
   'b',
@@ -40,7 +40,7 @@ export const inlineTags = new Set([
  * Complete list of HTML void elements
  * {@link https://developer.mozilla.org/en-US/docs/Glossary/Void_element}
  */
-export const voidTags = new Set([
+export const voidTags: Set<string> = new Set([
   'area',
   'base',
   'br',
@@ -60,7 +60,7 @@ export const voidTags = new Set([
 /**
  * List of HTML elements to avoid parsing inside
  */
-export const opaqueTags = new Set([
+export const opaqueTags: Set<string> = new Set([
   'code',
   'iframe',
   'math',
