@@ -10,7 +10,7 @@ import {
 } from './constants.ts';
 
 /** Attribute parser state */
-type STATE =
+type ParseState =
   | 'BEFORE_NAME'
   | 'NAME'
   | 'AFTER_NAME'
@@ -27,7 +27,7 @@ type STATE =
 export const parseAttributes = (attributes: string): AttributeMap => {
   const map: AttributeMap = new AttributeMap();
 
-  let state: STATE = 'BEFORE_NAME';
+  let state: ParseState = 'BEFORE_NAME';
   let name = '';
   let value = '';
 
