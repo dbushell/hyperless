@@ -2,7 +2,7 @@
  * Complete list of inline HTML elements
  * {@link https://developer.mozilla.org/en-US/docs/Web/HTML/Element#inline_text_semantics}
  */
-export const inlineTags: Array<string> = [
+export const inlineTags = new Set([
   'a',
   'abbr',
   'b',
@@ -34,14 +34,13 @@ export const inlineTags: Array<string> = [
   'u',
   'var',
   'wbr'
-];
-Object.freeze(inlineTags);
+]);
 
 /**
  * Complete list of HTML void elements
  * {@link https://developer.mozilla.org/en-US/docs/Glossary/Void_element}
  */
-export const voidTags: Array<string> = [
+export const voidTags = new Set([
   'area',
   'base',
   'br',
@@ -56,5 +55,4 @@ export const voidTags: Array<string> = [
   'source',
   'track',
   'wbr'
-];
-Object.freeze(voidTags);
+]);
