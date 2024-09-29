@@ -52,7 +52,50 @@ export class Node {
     return this.#attributes;
   }
 
-  /** Detatch node from parent tree */
+  /** Iterate over child nodes */
+  *[Symbol.iterator](): Generator<Node, void, unknown> {
+    for (let node = this.head; node; node = node.next) {
+      yield node;
+    }
+  }
+
+  /** Append one or more child nodes */
+  append(...nodes: Array<Node>): this {
+    for (const node of nodes) {
+      node.remove();
+      node.parent = this;
+      node.previous = this.tail;
+      if (this.tail) {
+        this.tail.next = node;
+        this.tail = node;
+      } else {
+        this.head = node;
+        this.tail = node;
+      }
+    }
+    return this;
+  }
+
+  /* Return child node at specified index */
+  at(index: number): Node | null {
+    let i = 0;
+    for (const node of this) {
+      if (i++ === index) return node;
+    }
+    return null;
+  }
+
+  /** Return index of child node, or -1 if not found */
+  indexOf(node: Node): number {
+    let i = 0;
+    for (const child of this) {
+      if (node === child) return i;
+      i++;
+    }
+    return -1;
+  }
+
+  /** Detatch this node from parent tree */
   remove() {
     const {next, previous, parent} = this;
     this.parent = null;
@@ -73,59 +116,57 @@ export class Node {
   }
 
   /** Remove this node with another */
-  replaceWith(node: Node) {
+  replace(node: Node) {
     node.remove();
-    const {next, previous, parent} = this;
-    this.parent = null;
-    this.next = null;
-    this.previous = null;
-    if (parent === null) {
-      return;
-    }
-    node.parent = parent;
-    if (next) {
-      node.next = next;
-      next.previous = node;
-    } else {
-      parent.tail = node;
-    }
-    if (previous) {
-      node.previous = previous;
-      previous.next = node;
-    } else {
-      parent.head = node;
+    if (this.parent) {
+      this.parent.insertAfter(node, this);
+      this.remove();
     }
   }
 
-  insertAfter(node: Node, after: Node): this {
+  /** Insert child node at index */
+  insertAt(node: Node, index: number): boolean {
+    if (index < 0) return false;
     node.remove();
     node.parent = this;
-    node.previous = after;
-    node.next = after.next;
-    if (node.next) {
-      node.next.previous = node;
+    const before = index ? this.at(index - 1) : null;
+    const after = this.at(index);
+    if (before) {
+      before.next = node;
+      node.previous = before;
+    } else {
+      this.head = node;
     }
-    if (node.previous) {
-      node.previous.next = node;
+    if (after) {
+      after.previous = node;
+      node.next = after;
+    } else {
+      this.tail = node;
     }
-    return this;
+    return true;
   }
 
-  /** Append a child node */
-  append(...nodes: Array<Node>): this {
-    for (const node of nodes) {
-      node.remove();
-      node.parent = this;
-      node.previous = this.tail;
-      if (this.tail) {
-        this.tail.next = node;
-        this.tail = node;
-      } else {
-        this.head = node;
-        this.tail = node;
-      }
+  /** Insert child node after target */
+  insertAfter(node: Node, target: Node): boolean {
+    node.remove();
+    const index = this.indexOf(target);
+    if (index === -1) return false;
+    return this.insertAt(node, index + 1);
+  }
+
+  /** Insert child node before target */
+  insertBefore(node: Node, target: Node): boolean {
+    node.remove();
+    const index = this.indexOf(target);
+    if (index === -1) return false;
+    return this.insertAt(node, index);
+  }
+
+  /** Traverse node tree */
+  traverse(callback: (node: Node) => unknown): void {
+    for (const child of this) {
+      if (callback(child) !== false) child.traverse(callback);
     }
-    return this;
   }
 
   /** Traverse tree until matching node is found */
@@ -135,13 +176,6 @@ export class Node {
       if (found) return found;
     }
     return null;
-  }
-
-  /** Traverse node tree */
-  traverse(callback: (node: Node) => unknown): void {
-    for (const child of this) {
-      if (callback(child) !== false) child.traverse(callback);
-    }
   }
 
   /** Find closest matching parent node */
@@ -155,41 +189,31 @@ export class Node {
     return parent;
   }
 
-  /* Return child node at specified index */
-  at(index: number): Node | null {
-    let i = 0;
-    for (const node of this) {
-      if (i++ === index) return node;
-    }
-    return null;
+  /** Return child node list as array */
+  toArray(): Array<Node> {
+    return Array.from(this);
   }
 
   /** Render node to HTML string */
   toString(): string {
     if (this.type === 'COMMENT') return '';
     if (this.type === 'STRAY') return '';
-    // Render nested children
-    let raw = this.raw;
+    let out = this.raw;
+    if (this.tag && (this.type === 'ELEMENT' || this.type === 'VOID')) {
+      let attr = this.attributes.toString();
+      if (attr.length) attr = ' ' + attr;
+      if (this.type === 'ELEMENT') {
+        out = `<${this.tag}${attr}>`;
+      } else if (this.type === 'VOID') {
+        out = `<${this.tag}${attr}/>`;
+      }
+    }
     for (const node of this) {
-      raw += node.toString();
+      out += node.toString();
     }
-    // Close element tags
-    if (this.type === 'ELEMENT' && this.tag) {
-      raw += `</${this.tag}>`;
+    if (this.tag && this.type === 'ELEMENT') {
+      out += `</${this.tag}>`;
     }
-    return raw;
-  }
-
-  /** Return child node list as array */
-  toArray(): Array<Node> {
-    return Array.from(this);
-  }
-
-  *[Symbol.iterator](): Generator<Node, void, unknown> {
-    let node = this.head;
-    while (node) {
-      yield node;
-      node = node.next;
-    }
+    return out;
   }
 }

@@ -42,6 +42,13 @@ Deno.test('void element', () => {
   assertEquals(root.at(1)!.type, 'VOID');
 });
 
+Deno.test('self-closing', () => {
+  const html = '<div />';
+  const root = parseHTML(html);
+  assertEquals(root.toArray().length, 1);
+  assertEquals(root.at(0)!.type, 'VOID');
+});
+
 Deno.test('stray node', () => {
   const html = '<p>1</p></p><p>2</p>';
   const root = parseHTML(html);
@@ -139,16 +146,48 @@ Deno.test('remove', () => {
   assertEquals(parent.toArray().length, 1);
 });
 
-Deno.test('replaceWith', () => {
+Deno.test('Node.replace', () => {
   const html = '<div><p>1</p><p>2</p><p>3</p></div>';
   const root = parseHTML(html);
   const A = parseHTML('<p>A</p>');
   const B = parseHTML('<p>B</p>');
   const C = parseHTML('<p>C</p>');
-  root.at(0)!.at(0)!.replaceWith(A);
-  root.at(0)!.at(1)!.replaceWith(B);
-  root.at(0)!.at(2)!.replaceWith(C);
+  root.at(0)!.at(0)!.replace(A);
+  root.at(0)!.at(1)!.replace(B);
+  root.at(0)!.at(2)!.replace(C);
   assertEquals(root.toString(), '<div><p>A</p><p>B</p><p>C</p></div>');
   assert(root.at(0)!.head === A);
   assert(root.at(0)!.tail === C);
+});
+
+Deno.test('Node.indexOf', () => {
+  const html = '<div><p>1</p><p>2</p><p>3</p><p>4</p><p>5</p></div>';
+  const root = parseHTML(html);
+  const parent = root.at(0)!;
+  const c0 = parent.at(0)!;
+  const c2 = parent.at(2)!;
+  const c4 = parent.at(4)!;
+  assertEquals(parent.indexOf(c0), 0);
+  assertEquals(parent.indexOf(c2), 2);
+  assertEquals(parent.indexOf(c4), 4);
+  assertEquals(c0.indexOf(c4), -1);
+});
+
+Deno.test('Node.insertAt', () => {
+  const root = parseHTML('<div></div>');
+  const n1 = parseHTML('<p>1</p>');
+  const n2 = parseHTML('<p>2</p>');
+  const n3 = parseHTML('<p>3</p>');
+  const div = root.at(0)!;
+  div.insertAt(n3, 0);
+  div.insertAt(n2, 0);
+  div.insertAt(n1, 0);
+  assertEquals(root.toString(), '<div><p>1</p><p>2</p><p>3</p></div>');
+  div.insertAfter(n1, n2);
+  assertEquals(root.toString(), '<div><p>2</p><p>1</p><p>3</p></div>');
+  div.insertBefore(n3, n2);
+  assertEquals(root.toString(), '<div><p>3</p><p>2</p><p>1</p></div>');
+  div.insertAt(n1, 0);
+  div.insertAt(n3, 2);
+  assertEquals(root.toString(), '<div><p>1</p><p>2</p><p>3</p></div>');
 });
