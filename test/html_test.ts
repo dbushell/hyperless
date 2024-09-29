@@ -1,3 +1,4 @@
+import {Node} from '../mod.ts';
 import {parseHTML} from '../src/html-parser.ts';
 import {assert, assertEquals} from 'jsr:@std/assert';
 
@@ -122,72 +123,69 @@ Deno.test('render', () => {
 });
 
 Deno.test('remove', () => {
-  const html = '<div><p>1</p><p>2</p><p>3</p><p>4</p><p>5</p></div>';
+  const html = '<p>1</p><p>2</p><p>3</p><p>4</p><p>5</p>';
   const root = parseHTML(html);
-  const parent = root.at(0)!;
-  const c0 = parent.at(0)!;
-  const c1 = parent.at(1)!;
-  const c2 = parent.at(2)!;
-  const c3 = parent.at(3)!;
-  const c4 = parent.at(4)!;
-  assertEquals(parent.toArray().length, 5);
+  const c0 = root.at(0)!;
+  const c1 = root.at(1)!;
+  const c2 = root.at(2)!;
+  const c3 = root.at(3)!;
+  const c4 = root.at(4)!;
+  assertEquals(root.toArray().length, 5);
   c0.remove();
-  assertEquals(parent.toArray().length, 4);
-  assert(parent.head === c1);
-  assert(parent.tail === c4);
+  assertEquals(root.toArray().length, 4);
+  assert(root.head === c1);
+  assert(root.tail === c4);
   c3.remove();
-  assertEquals(parent.toArray().length, 3);
-  assert(parent.head === c1);
-  assert(parent.tail === c4);
+  assertEquals(root.toArray().length, 3);
+  assert(root.head === c1);
+  assert(root.tail === c4);
   c4.remove();
-  assert(parent.tail === c2);
+  assert(root.tail === c2);
   c1.remove();
-  assert(parent.head === c2);
-  assertEquals(parent.toArray().length, 1);
+  assert(root.head === c2);
+  assertEquals(root.toArray().length, 1);
 });
 
-Deno.test('Node.replace', () => {
-  const html = '<div><p>1</p><p>2</p><p>3</p></div>';
+Deno.test('Node.replaceWith', () => {
+  const html = '<p>1</p><p>2</p><p>3</p>';
   const root = parseHTML(html);
   const A = parseHTML('<p>A</p>');
   const B = parseHTML('<p>B</p>');
   const C = parseHTML('<p>C</p>');
-  root.at(0)!.at(0)!.replace(A);
-  root.at(0)!.at(1)!.replace(B);
-  root.at(0)!.at(2)!.replace(C);
-  assertEquals(root.toString(), '<div><p>A</p><p>B</p><p>C</p></div>');
-  assert(root.at(0)!.head === A);
-  assert(root.at(0)!.tail === C);
+  root.at(0)!.replaceWith(A);
+  root.at(1)!.replaceWith(B);
+  root.at(2)!.replaceWith(C);
+  assertEquals(root.toString(), '<p>A</p><p>B</p><p>C</p>');
+  assert(root.head === A);
+  assert(root.tail === C);
 });
 
 Deno.test('Node.indexOf', () => {
-  const html = '<div><p>1</p><p>2</p><p>3</p><p>4</p><p>5</p></div>';
+  const html = '<p>1</p><p>2</p><p>3</p><p>4</p><p>5</p>';
   const root = parseHTML(html);
-  const parent = root.at(0)!;
-  const c0 = parent.at(0)!;
-  const c2 = parent.at(2)!;
-  const c4 = parent.at(4)!;
-  assertEquals(parent.indexOf(c0), 0);
-  assertEquals(parent.indexOf(c2), 2);
-  assertEquals(parent.indexOf(c4), 4);
+  const c0 = root.at(0)!;
+  const c2 = root.at(2)!;
+  const c4 = root.at(4)!;
+  assertEquals(root.indexOf(c0), 0);
+  assertEquals(root.indexOf(c2), 2);
+  assertEquals(root.indexOf(c4), 4);
   assertEquals(c0.indexOf(c4), -1);
 });
 
 Deno.test('Node.insertAt', () => {
-  const root = parseHTML('<div></div>');
+  const root = new Node();
   const n1 = parseHTML('<p>1</p>');
   const n2 = parseHTML('<p>2</p>');
   const n3 = parseHTML('<p>3</p>');
-  const div = root.at(0)!;
-  div.insertAt(n3, 0);
-  div.insertAt(n2, 0);
-  div.insertAt(n1, 0);
-  assertEquals(root.toString(), '<div><p>1</p><p>2</p><p>3</p></div>');
-  div.insertAfter(n1, n2);
-  assertEquals(root.toString(), '<div><p>2</p><p>1</p><p>3</p></div>');
-  div.insertBefore(n3, n2);
-  assertEquals(root.toString(), '<div><p>3</p><p>2</p><p>1</p></div>');
-  div.insertAt(n1, 0);
-  div.insertAt(n3, 2);
-  assertEquals(root.toString(), '<div><p>1</p><p>2</p><p>3</p></div>');
+  root.insertAt(n3, 0);
+  root.insertAt(n2, 0);
+  root.insertAt(n1, 0);
+  assertEquals(root.toString(), '<p>1</p><p>2</p><p>3</p>');
+  root.insertAfter(n1, n2);
+  assertEquals(root.toString(), '<p>2</p><p>1</p><p>3</p>');
+  root.insertBefore(n3, n2);
+  assertEquals(root.toString(), '<p>3</p><p>2</p><p>1</p>');
+  root.insertAt(n1, 0);
+  root.insertAt(n3, 2);
+  assertEquals(root.toString(), '<p>1</p><p>2</p><p>3</p>');
 });

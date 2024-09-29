@@ -45,6 +45,7 @@ export class Node {
 
   /** Map of HTML attributes */
   get attributes(): AttributeMap {
+    // Parse on first request for performance
     if (this.#attributes === undefined) {
       const match = this.raw.match(new RegExp(anyTag.source, 's'));
       this.#attributes = parseAttributes(match?.[2] ?? '');
@@ -52,11 +53,37 @@ export class Node {
     return this.#attributes;
   }
 
+  /** Opening tag HTML with parsed attributes */
+  get tagOpen(): string {
+    if (this.tag === '' || ['ELEMENT', 'VOID'].includes(this.type) === false) {
+      return '';
+    }
+    let out = '<' + this.tag;
+    const attr = this.attributes.toString();
+    if (attr.length) out += ' ' + attr;
+    if (this.type === 'VOID') out += '/';
+    return out + '>';
+  }
+
+  /** Closing tag HTML */
+  get tagClose(): string {
+    if (this.tag && this.type === 'ELEMENT') {
+      return `</${this.tag}>`;
+    }
+    return '';
+  }
+
   /** Iterate over child nodes */
   *[Symbol.iterator](): Generator<Node, void, unknown> {
     for (let node = this.head; node; node = node.next) {
       yield node;
     }
+  }
+
+  /** Remove all child nodes */
+  clear(): this {
+    while (this.tail) this.tail.remove();
+    return this;
   }
 
   /** Append one or more child nodes */
@@ -76,7 +103,7 @@ export class Node {
     return this;
   }
 
-  /* Return child node at specified index */
+  /* Return child node at index */
   at(index: number): Node | null {
     let i = 0;
     for (const node of this) {
@@ -95,28 +122,20 @@ export class Node {
     return -1;
   }
 
-  /** Detatch this node from parent tree */
+  /** Detatch this node from parent */
   remove() {
     const {next, previous, parent} = this;
-    this.parent = null;
     this.next = null;
     this.previous = null;
-    if (next) {
-      next.previous = previous;
-      if (parent?.head === this) {
-        parent.head = next;
-      }
-    }
-    if (previous) {
-      previous.next = next;
-      if (parent?.tail === this) {
-        parent.tail = previous;
-      }
-    }
+    this.parent = null;
+    if (next) next.previous = previous;
+    if (previous) previous.next = next;
+    if (parent?.head === this) parent.head = next;
+    if (parent?.tail === this) parent.tail = previous;
   }
 
-  /** Remove this node with another */
-  replace(node: Node) {
+  /** Replace this node with another */
+  replaceWith(node: Node) {
     node.remove();
     if (this.parent) {
       this.parent.insertAfter(node, this);
@@ -170,23 +189,23 @@ export class Node {
   }
 
   /** Traverse tree until matching node is found */
-  find(matcher: (node: Node) => boolean): Node | null {
+  find(match: (node: Node) => boolean): Node | null {
     for (const child of this) {
-      const found = matcher(child) ? child : child.find(matcher);
+      const found = match(child) ? child : child.find(match);
       if (found) return found;
     }
     return null;
   }
 
   /** Find closest matching parent node */
-  closest(matcher: (node: Node) => boolean): Node | null {
+  closest(match: (node: Node) => boolean): Node | null {
     let parent = this.parent;
     while (parent) {
       if (parent === null) return null;
-      if (matcher(parent)) return parent;
+      if (match(parent)) return parent;
       parent = parent.parent;
     }
-    return parent;
+    return null;
   }
 
   /** Return child node list as array */
@@ -198,22 +217,11 @@ export class Node {
   toString(): string {
     if (this.type === 'COMMENT') return '';
     if (this.type === 'STRAY') return '';
-    let out = this.raw;
-    if (this.tag && (this.type === 'ELEMENT' || this.type === 'VOID')) {
-      let attr = this.attributes.toString();
-      if (attr.length) attr = ' ' + attr;
-      if (this.type === 'ELEMENT') {
-        out = `<${this.tag}${attr}>`;
-      } else if (this.type === 'VOID') {
-        out = `<${this.tag}${attr}/>`;
-      }
-    }
+    let out = this.tagOpen || this.raw;
     for (const node of this) {
       out += node.toString();
     }
-    if (this.tag && this.type === 'ELEMENT') {
-      out += `</${this.tag}>`;
-    }
+    out += this.tagClose;
     return out;
   }
 }
