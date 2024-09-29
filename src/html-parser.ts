@@ -54,6 +54,9 @@ export const parseHTML = (html: string, tag = 'html'): Node => {
     if (state === 'RAWTEXT') {
       // Switch state if closing tag matches
       if (tagName === parent.tag && tagText.startsWith('</')) {
+        if (parent.parent === null) {
+          throw new Error();
+        }
         parent.raw += `</${parent.tag}>`;
         parent = parent.parent;
         state = 'DATA';
@@ -71,10 +74,9 @@ export const parseHTML = (html: string, tag = 'html'): Node => {
     }
     // Append closing tag and descend
     else if (tagText.startsWith('</')) {
-      if (parent === parent.parent) {
+      if (parent.parent === null) {
         parent.append(new Node(parent, 'STRAY', tagText, tagName));
       } else {
-        // parent.append(new Node(parent, 'CLOSE', tagText, tagName));
         parent = parent.parent;
       }
     }
