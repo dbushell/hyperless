@@ -12,13 +12,15 @@ export type NodeType =
   | 'TEXT'
   | 'VOID';
 
+const renderTypes = new Set(['ELEMENT', 'VOID']);
+
 /**
  * HTML node
  */
 export class Node {
   #attributes: AttributeMap | undefined;
+  #tag: string;
   raw: string;
-  tag: string;
   type: NodeType;
   /** Parent node */
   parent: Node | null = null;
@@ -35,12 +37,12 @@ export class Node {
     parent: Node | null = null,
     type: NodeType = 'TEXT',
     raw = '',
-    tag = ''
+    tag = 'div'
   ) {
     this.parent = parent;
-    this.tag = tag;
-    this.raw = raw;
     this.type = type;
+    this.raw = raw;
+    this.#tag = tag;
   }
 
   /** Map of HTML attributes */
@@ -53,10 +55,20 @@ export class Node {
     return this.#attributes;
   }
 
-  /** Opening tag HTML with parsed attributes */
-  get tagOpen(): string {
-    if (this.tag === '' || ['ELEMENT', 'VOID'].includes(this.type) === false) {
-      return '';
+  /** Tag name normalized to lowercase */
+  get tag() {
+    return this.#tag.toLowerCase();
+  }
+
+  /** Original tag name unformatted */
+  get tagRaw() {
+    return this.#tag;
+  }
+
+  /** Formatted opening tag with parsed attributes */
+  get tagOpen(): string | undefined {
+    if (renderTypes.has(this.type) === false) {
+      return undefined;
     }
     let out = '<' + this.tag;
     const attr = this.attributes.toString();
@@ -65,12 +77,12 @@ export class Node {
     return out + '>';
   }
 
-  /** Closing tag HTML */
-  get tagClose(): string {
-    if (this.tag && this.type === 'ELEMENT') {
+  /** Formatted closing tag */
+  get tagClose(): string | undefined {
+    if (this.type === 'ELEMENT') {
       return `</${this.tag}>`;
     }
-    return '';
+    return undefined;
   }
 
   /** Iterate over child nodes */
@@ -221,7 +233,7 @@ export class Node {
     for (const node of this) {
       out += node.toString();
     }
-    out += this.tagClose;
+    out += this.tagClose ?? '';
     return out;
   }
 }

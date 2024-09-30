@@ -49,7 +49,8 @@ export const parseHTML = (html: string, tag = 'html'): Node => {
 
     // Matched tag parts
     const tagText = tag[0];
-    const tagName = tag[1]?.toLowerCase() ?? '';
+    const tagRaw = tag[1] ?? '';
+    const tagName = tagRaw.toLowerCase();
 
     if (state === 'RAWTEXT') {
       // Switch state if closing tag matches
@@ -66,30 +67,30 @@ export const parseHTML = (html: string, tag = 'html'): Node => {
     }
     // Append comment
     else if (tagText.startsWith(`<!--`)) {
-      parent.append(new Node(parent, 'COMMENT', tagText, tagName));
+      parent.append(new Node(parent, 'COMMENT', tagText, tagRaw));
     }
     // Append self-closing and void tags
     else if (voidTags.has(tagName) || tagText.endsWith('/>')) {
-      parent.append(new Node(parent, 'VOID', tagText, tagName));
+      parent.append(new Node(parent, 'VOID', tagText, tagRaw));
     }
     // Append closing tag and descend
     else if (tagText.startsWith('</')) {
       if (parent.parent === null) {
-        parent.append(new Node(parent, 'STRAY', tagText, tagName));
+        parent.append(new Node(parent, 'STRAY', tagText, tagRaw));
       } else {
         parent = parent.parent;
       }
     }
     // Append opaque tag and change state
     else if (opaqueTags.has(tagName)) {
-      const node = new Node(parent, 'OPAQUE', tagText, tagName);
+      const node = new Node(parent, 'OPAQUE', tagText, tagRaw);
       parent.append(node);
       parent = node;
       state = 'RAWTEXT';
     }
     // Append opening tag and ascend
     else {
-      const node = new Node(parent, 'ELEMENT', tagText, tagName);
+      const node = new Node(parent, 'ELEMENT', tagText, tagRaw);
       parent.append(node);
       parent = node;
     }
