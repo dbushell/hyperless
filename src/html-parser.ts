@@ -8,14 +8,29 @@ const commentTag = new RegExp(`^${comment.source}|^${anyTag.source}`);
 /** HTML parser state */
 type ParseState = 'DATA' | 'RAWTEXT';
 
+/** `parseHTML` configuration */
+export type ParseOptions = {
+  rootTag: string;
+  opaqueTags: Set<string>;
+  voidTags: Set<string>;
+};
+
+export const getParseOptions = (): ParseOptions => ({
+  rootTag: 'html',
+  opaqueTags: new Set(opaqueTags),
+  voidTags: new Set(voidTags)
+});
+
+const parseOptions = getParseOptions();
+
 /**
  * Parse HTML text into a Node tree
  * @param html HTML text to parse
  * @param tag Root tag name
  */
-export const parseHTML = (html: string, tag = 'html'): Node => {
+export const parseHTML = (html: string, options = parseOptions): Node => {
   // Create current parent node
-  const root = new Node(null, 'ROOT', '', tag);
+  const root = new Node(null, 'ROOT', '', options.rootTag);
   let parent = root;
   let state: ParseState = 'DATA';
   // Start at first potential tag
@@ -70,7 +85,7 @@ export const parseHTML = (html: string, tag = 'html'): Node => {
       parent.append(new Node(parent, 'COMMENT', tagText, tagRaw));
     }
     // Append self-closing and void tags
-    else if (voidTags.has(tagName) || tagText.endsWith('/>')) {
+    else if (options.voidTags.has(tagName) || tagText.endsWith('/>')) {
       parent.append(new Node(parent, 'VOID', tagText, tagRaw));
     }
     // Append closing tag and descend
@@ -82,7 +97,7 @@ export const parseHTML = (html: string, tag = 'html'): Node => {
       }
     }
     // Append opaque tag and change state
-    else if (opaqueTags.has(tagName)) {
+    else if (options.opaqueTags.has(tagName)) {
       const node = new Node(parent, 'OPAQUE', tagText, tagRaw);
       parent.append(node);
       parent = node;
