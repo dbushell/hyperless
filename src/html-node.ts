@@ -31,7 +31,7 @@ export class Node {
     raw = '',
     tag = 'div'
   ) {
-    this.parent = parent;
+    parent?.append(this);
     this.type = type;
     this.raw = raw;
     this.#tag = tag;
@@ -115,6 +115,7 @@ export class Node {
   /** Append one or more child nodes */
   append(...nodes: Array<Node>): void {
     for (const node of nodes) {
+      node.detach();
       node.parent = this;
       this.children.push(node);
     }
