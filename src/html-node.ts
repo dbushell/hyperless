@@ -29,7 +29,7 @@ export class Node {
     parent: Node | null = null,
     type: NodeType = 'TEXT',
     raw = '',
-    tag = 'div'
+    tag = ''
   ) {
     parent?.append(this);
     this.type = type;
@@ -148,8 +148,8 @@ export class Node {
     node.detach();
     if (this.parent === null) return;
     this.parent.children[this.index] = node;
+    node.parent = this.parent;
     this.parent = null;
-    node.parent = this;
   }
 
   /** Add child node at index */
