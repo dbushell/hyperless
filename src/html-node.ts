@@ -6,6 +6,7 @@ import {anyTag} from './regexp.ts';
 export type NodeType =
   | 'COMMENT'
   | 'ELEMENT'
+  | 'INVISIBLE'
   | 'OPAQUE'
   | 'ROOT'
   | 'STRAY'
@@ -70,6 +71,16 @@ export class Node {
   /** Node index within parent children (or -1 if detached) */
   get index(): number {
     return this.parent?.indexOf(this) ?? -1;
+  }
+
+  get depth(): number {
+    let depth = 0;
+    let parent = this.parent;
+    while (parent) {
+      if (parent.type !== 'INVISIBLE') depth++;
+      parent = parent.parent;
+    }
+    return depth;
   }
 
   /** Adjacent node after this within parent children */
@@ -137,21 +148,6 @@ export class Node {
     return this.children.indexOf(node);
   }
 
-  /** Remove this node from its parent */
-  detach(): void {
-    this.parent?.children.splice(this.index, 1);
-    this.parent = null;
-  }
-
-  /** Replace this node with another */
-  replaceWith(node: Node): void {
-    node.detach();
-    if (this.parent === null) return;
-    this.parent.children[this.index] = node;
-    node.parent = this.parent;
-    this.parent = null;
-  }
-
   /** Add child node at index */
   insertAt(node: Node, index: number): void {
     node.detach();
@@ -159,18 +155,31 @@ export class Node {
     node.parent = this;
   }
 
-  /** Add child node after target */
-  insertAfter(node: Node, target: Node): void {
-    node.detach();
-    if (target.parent !== this) return;
-    this.insertAt(node, target.index + 1);
+  /** Remove this node from its parent */
+  detach(): void {
+    this.parent?.children.splice(this.index, 1);
+    this.parent = null;
   }
 
-  /** Add child node before target */
-  insertBefore(node: Node, target: Node): void {
+  /** Add child node after this node */
+  after(node: Node): void {
     node.detach();
-    if (target.parent !== this) return;
-    this.insertAt(node, target.index);
+    this.parent?.insertAt(node, this.index + 1);
+  }
+
+  /** Add child node before this node */
+  before(node: Node): void {
+    node.detach();
+    this.parent?.insertAt(node, this.index);
+  }
+
+  /** Replace this node with another */
+  replace(node: Node): void {
+    node.detach();
+    if (this.parent === null) return;
+    this.parent.children[this.index] = node;
+    node.parent = this.parent;
+    this.parent = null;
   }
 
   /** Traverse node tree */

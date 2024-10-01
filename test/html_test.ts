@@ -152,9 +152,9 @@ Deno.test('Node.replaceWith', () => {
   const A = parseHTML('<p>A</p>');
   const B = parseHTML('<p>B</p>');
   const C = parseHTML('<p>C</p>');
-  root.at(0)!.replaceWith(A);
-  root.at(1)!.replaceWith(B);
-  root.at(2)!.replaceWith(C);
+  root.at(0)!.replace(A);
+  root.at(1)!.replace(B);
+  root.at(2)!.replace(C);
   assertEquals(root.toString(), '<p>A</p><p>B</p><p>C</p>');
   assert(root.head === A);
   assert(root.tail === C);
@@ -181,11 +181,31 @@ Deno.test('Node.insertAt', () => {
   root.insertAt(n2, 0);
   root.insertAt(n1, 0);
   assertEquals(root.toString(), '<p>1</p><p>2</p><p>3</p>');
-  root.insertAfter(n1, n2);
-  assertEquals(root.toString(), '<p>2</p><p>1</p><p>3</p>');
-  root.insertBefore(n3, n2);
-  assertEquals(root.toString(), '<p>3</p><p>2</p><p>1</p>');
-  root.insertAt(n1, 0);
-  root.insertAt(n3, 2);
+});
+
+Deno.test('Node.after', () => {
+  const root = new Node();
+  const n1 = parseHTML('<p>1</p>');
+  const n2 = parseHTML('<p>2</p>');
+  const n3 = parseHTML('<p>3</p>');
+  root.append(n1, n2, n3);
   assertEquals(root.toString(), '<p>1</p><p>2</p><p>3</p>');
+  n2.after(n1); // 2 1 3
+  n1.after(n3);
+  n2.after(n3); // 2 3 1
+  n1.after(n2); // 3 1 2
+  n2.after(n1); // 3 2 1
+  assertEquals(root.toString(), '<p>3</p><p>2</p><p>1</p>');
+});
+
+Deno.test('Node.before', () => {
+  const root = new Node();
+  const n1 = parseHTML('<p>1</p>');
+  const n2 = parseHTML('<p>2</p>');
+  const n3 = parseHTML('<p>3</p>');
+  root.append(n1, n2, n3);
+  assertEquals(root.toString(), '<p>1</p><p>2</p><p>3</p>');
+  n3.before(n1); // 2 1 3
+  n2.before(n3); // 3 2 1
+  assertEquals(root.toString(), '<p>3</p><p>2</p><p>1</p>');
 });
