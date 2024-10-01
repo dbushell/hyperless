@@ -7,7 +7,7 @@ Deno.test('paragraph', () => {
   const root = parseHTML(html);
   const p = root.at(0)!;
   assertEquals(p.tag, 'p');
-  assertEquals(p.toArray().length, 1);
+  assertEquals(p.size, 1);
   assertEquals(p.at(0)!.type, 'TEXT');
   assertEquals(p.at(0)!.raw, 'Paragraph');
 });
@@ -23,7 +23,7 @@ Deno.test('paragraph inline', () => {
   const root = parseHTML(html);
   const p = root.at(0)!;
   const strong = p.at(1)!;
-  assertEquals(p.toArray().length, 2);
+  assertEquals(p.size, 2);
   assertEquals(p.at(0)!.type, 'TEXT');
   assertEquals(strong.tag, 'strong');
   assertEquals(strong.at(0)!.raw, 'inline');
@@ -33,27 +33,27 @@ Deno.test('fake out tag', () => {
   const html = '<p>Less than < fake tag</p>';
   const root = parseHTML(html);
   const p = root.at(0)!;
-  assertEquals(p.toArray().length, 2);
+  assertEquals(p.size, 2);
 });
 
 Deno.test('void element', () => {
   const html = '<p>1</p><img><p>2</p>';
   const root = parseHTML(html);
-  assertEquals(root.toArray().length, 3);
+  assertEquals(root.size, 3);
   assertEquals(root.at(1)!.type, 'VOID');
 });
 
 Deno.test('self-closing', () => {
   const html = '<div />';
   const root = parseHTML(html);
-  assertEquals(root.toArray().length, 1);
+  assertEquals(root.size, 1);
   assertEquals(root.at(0)!.type, 'VOID');
 });
 
 Deno.test('stray node', () => {
   const html = '<p>1</p></p><p>2</p>';
   const root = parseHTML(html);
-  assertEquals(root.toArray().length, 3);
+  assertEquals(root.size, 3);
   assertEquals(root.at(1)!.type, 'STRAY');
 });
 
@@ -84,7 +84,7 @@ Deno.test('opaque state (svg)', () => {
 </svg>`;
   const html = `<p>Before</p>${svg}<p>After</p>`;
   const root = parseHTML(html);
-  assertEquals(root.toArray().length, 3);
+  assertEquals(root.size, 3);
   assertEquals(root.at(1)!.type, 'OPAQUE');
   assertEquals(root.at(1)!.raw, svg);
 });
@@ -122,7 +122,7 @@ Deno.test('render', () => {
   assertEquals(root.toString(), render);
 });
 
-Deno.test('remove', () => {
+Deno.test('detach', () => {
   const html = '<p>1</p><p>2</p><p>3</p><p>4</p><p>5</p>';
   const root = parseHTML(html);
   const c0 = root.at(0)!;
@@ -130,20 +130,20 @@ Deno.test('remove', () => {
   const c2 = root.at(2)!;
   const c3 = root.at(3)!;
   const c4 = root.at(4)!;
-  assertEquals(root.toArray().length, 5);
-  c0.remove();
-  assertEquals(root.toArray().length, 4);
+  assertEquals(root.size, 5);
+  c0.detach();
+  assertEquals(root.size, 4);
   assert(root.head === c1);
   assert(root.tail === c4);
-  c3.remove();
-  assertEquals(root.toArray().length, 3);
+  c3.detach();
+  assertEquals(root.size, 3);
   assert(root.head === c1);
   assert(root.tail === c4);
-  c4.remove();
+  c4.detach();
   assert(root.tail === c2);
-  c1.remove();
+  c1.detach();
   assert(root.head === c2);
-  assertEquals(root.toArray().length, 1);
+  assertEquals(root.size, 1);
 });
 
 Deno.test('Node.replaceWith', () => {

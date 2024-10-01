@@ -19,19 +19,11 @@ const renderTypes = new Set(['ELEMENT', 'VOID']);
  */
 export class Node {
   #attributes: AttributeMap | undefined;
+  #children: Array<Node> = [];
   #tag: string;
   raw: string;
   type: NodeType;
-  /** Parent node */
   parent: Node | null = null;
-  /** First child node */
-  head: Node | null = null;
-  /** Last child node */
-  tail: Node | null = null;
-  /** Next adjacent sibling node */
-  next: Node | null = null;
-  /** Previous adjacent sibling node */
-  previous: Node | null = null;
 
   constructor(
     parent: Node | null = null,
@@ -55,12 +47,47 @@ export class Node {
     return this.#attributes;
   }
 
+  /** Array of child nodes */
+  get children(): Array<Node> {
+    return this.#children;
+  }
+
+  /** Number of child nodes */
+  get size(): number {
+    return this.children.length;
+  }
+
+  /** First child node */
+  get head(): Node | null {
+    return this.children[0] ?? null;
+  }
+
+  /** Last child node */
+  get tail(): Node | null {
+    return this.children[this.size - 1] ?? null;
+  }
+
+  /** Node index within parent children (or -1 if detached) */
+  get index(): number {
+    return this.parent?.indexOf(this) ?? -1;
+  }
+
+  /** Adjacent node after this within parent children */
+  get next(): Node | null {
+    return this.parent?.children[this.index + 1] ?? null;
+  }
+
+  /** Adjacent node before this within parent children */
+  get previous(): Node | null {
+    return this.parent?.children[this.index - 1] ?? null;
+  }
+
   /** Tag name normalized to lowercase */
   get tag() {
     return this.#tag.toLowerCase();
   }
 
-  /** Original tag name unformatted */
+  /** Tag name unformatted */
   get tagRaw() {
     return this.#tag;
   }
@@ -85,124 +112,76 @@ export class Node {
     return undefined;
   }
 
-  /** Iterate over child nodes */
-  *[Symbol.iterator](): Generator<Node, void, unknown> {
-    for (let node = this.head; node; node = node.next) {
-      yield node;
+  /** Append one or more child nodes */
+  append(...nodes: Array<Node>): void {
+    for (const node of nodes) {
+      node.parent = this;
+      this.children.push(node);
     }
   }
 
   /** Remove all child nodes */
-  clear(): this {
-    while (this.tail) this.tail.remove();
-    return this;
-  }
-
-  /** Append one or more child nodes */
-  append(...nodes: Array<Node>): this {
-    for (const node of nodes) {
-      node.remove();
-      node.parent = this;
-      node.previous = this.tail;
-      if (this.tail) {
-        this.tail.next = node;
-        this.tail = node;
-      } else {
-        this.head = node;
-        this.tail = node;
-      }
-    }
-    return this;
+  clear(): void {
+    this.children.map((child) => (child.parent = null));
+    this.#children = [];
   }
 
   /* Return child node at index */
   at(index: number): Node | null {
-    let i = 0;
-    for (const node of this) {
-      if (i++ === index) return node;
-    }
-    return null;
+    return this.children.at(index) ?? null;
   }
 
-  /** Return index of child node, or -1 if not found */
+  /** Return index of child node (or -1 if not parent) */
   indexOf(node: Node): number {
-    let i = 0;
-    for (const child of this) {
-      if (node === child) return i;
-      i++;
-    }
-    return -1;
+    return this.children.indexOf(node);
   }
 
-  /** Detatch this node from parent */
-  remove() {
-    const {next, previous, parent} = this;
-    this.next = null;
-    this.previous = null;
+  /** Remove this node from its parent */
+  detach(): void {
+    this.parent?.children.splice(this.index, 1);
     this.parent = null;
-    if (next) next.previous = previous;
-    if (previous) previous.next = next;
-    if (parent?.head === this) parent.head = next;
-    if (parent?.tail === this) parent.tail = previous;
   }
 
   /** Replace this node with another */
-  replaceWith(node: Node) {
-    node.remove();
-    if (this.parent) {
-      this.parent.insertAfter(node, this);
-      this.remove();
-    }
-  }
-
-  /** Insert child node at index */
-  insertAt(node: Node, index: number): boolean {
-    if (index < 0) return false;
-    node.remove();
+  replaceWith(node: Node): void {
+    node.detach();
+    if (this.parent === null) return;
+    this.parent.children[this.index] = node;
+    this.parent = null;
     node.parent = this;
-    const before = index ? this.at(index - 1) : null;
-    const after = this.at(index);
-    if (before) {
-      before.next = node;
-      node.previous = before;
-    } else {
-      this.head = node;
-    }
-    if (after) {
-      after.previous = node;
-      node.next = after;
-    } else {
-      this.tail = node;
-    }
-    return true;
   }
 
-  /** Insert child node after target */
-  insertAfter(node: Node, target: Node): boolean {
-    node.remove();
-    const index = this.indexOf(target);
-    if (index === -1) return false;
-    return this.insertAt(node, index + 1);
+  /** Add child node at index */
+  insertAt(node: Node, index: number): void {
+    node.detach();
+    this.#children.splice(index, 0, node);
+    node.parent = this;
   }
 
-  /** Insert child node before target */
-  insertBefore(node: Node, target: Node): boolean {
-    node.remove();
-    const index = this.indexOf(target);
-    if (index === -1) return false;
-    return this.insertAt(node, index);
+  /** Add child node after target */
+  insertAfter(node: Node, target: Node): void {
+    node.detach();
+    if (target.parent !== this) return;
+    this.insertAt(node, target.index + 1);
+  }
+
+  /** Add child node before target */
+  insertBefore(node: Node, target: Node): void {
+    node.detach();
+    if (target.parent !== this) return;
+    this.insertAt(node, target.index);
   }
 
   /** Traverse node tree */
   traverse(callback: (node: Node) => unknown): void {
-    for (const child of this) {
+    for (const child of this.#children) {
       if (callback(child) !== false) child.traverse(callback);
     }
   }
 
   /** Traverse tree until matching node is found */
   find(match: (node: Node) => boolean): Node | null {
-    for (const child of this) {
+    for (const child of this.#children) {
       const found = match(child) ? child : child.find(match);
       if (found) return found;
     }
@@ -220,17 +199,12 @@ export class Node {
     return null;
   }
 
-  /** Return child node list as array */
-  toArray(): Array<Node> {
-    return Array.from(this);
-  }
-
   /** Render node to HTML string */
   toString(): string {
     if (this.type === 'COMMENT') return '';
     if (this.type === 'STRAY') return '';
     let out = this.tagOpen || this.raw;
-    for (const node of this) {
+    for (const node of this.#children) {
       out += node.toString();
     }
     out += this.tagClose ?? '';
