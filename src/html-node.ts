@@ -30,12 +30,14 @@ export class Node {
     parent: Node | null = null,
     type: NodeType = 'TEXT',
     raw = '',
-    tag = ''
+    tag = '',
+    attributes?: AttributeMap
   ) {
     parent?.append(this);
     this.type = type;
     this.raw = raw;
     this.#tag = tag;
+    this.#attributes = attributes ? new Map(attributes) : undefined;
   }
 
   /** Map of HTML attributes */
@@ -136,6 +138,23 @@ export class Node {
   clear(): void {
     this.children.map((child) => (child.parent = null));
     this.#children = [];
+  }
+
+  /** Create a copy of this node */
+  clone(deep = true): Node {
+    const node = new Node(
+      null,
+      this.type,
+      this.raw,
+      this.#tag,
+      this.#attributes
+    );
+    if (deep) {
+      for (const child of this.children) {
+        node.append(child.clone(deep));
+      }
+    }
+    return node;
   }
 
   /* Return child node at index */
