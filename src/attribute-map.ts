@@ -2,8 +2,8 @@ import {escape, unescape} from './html-utils.ts';
 
 /**
  * HTML attributes map
- * Keys are case-insensitive keys
- * HTML entities in values are automatically encoded
+ * Keys are case-insensitive
+ * HTML entities are automatically encoded
  */
 export class AttributeMap extends Map<string, string> {
   constructor(
