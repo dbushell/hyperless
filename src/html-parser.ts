@@ -21,7 +21,7 @@ export const getParseOptions = (): ParseOptions => ({
   voidTags: new Set(voidTags)
 });
 
-const parseOptions = getParseOptions();
+const parseOptions: ParseOptions = getParseOptions();
 
 /**
  * Parse HTML text into a Node tree
