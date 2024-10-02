@@ -27,6 +27,8 @@ import {parseAttributes} from '@dbushell/hyperless';
 const map = parseAttributes('a="1" b="2" c d="d" D="d"');
 ```
 
+HTML entity encoding is handled automatically by default.
+
 ### `excerpt`
 
 Generate a text excerpt from HTML content.
@@ -40,6 +42,10 @@ const text = excerpt(html);
 Output is context aware trimmed to the nearest sentence, or word, to fit the maximum length as close as possible.
 
 An optional `maxLength` can be passed as the second argument (default: `300` characters).
+
+## Other Exports
+
+Any exports not documented above are considered unstable and subject to change or removal. Unless I do a `1.0` release that is true for everything, to be honest.
 
 * * *
 

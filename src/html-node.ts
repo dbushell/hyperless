@@ -96,12 +96,12 @@ export class Node {
   }
 
   /** Tag name normalized to lowercase */
-  get tag() {
+  get tag(): string {
     return this.#tag.toLowerCase();
   }
 
   /** Tag name unformatted */
-  get tagRaw() {
+  get tagRaw(): string {
     return this.#tag;
   }
 
