@@ -1,4 +1,4 @@
-import type {AttributeMap} from './attribute-map.ts';
+import {AttributeMap} from './attribute-map.ts';
 import {parseAttributes} from './attribute-parser.ts';
 import {anyTag} from './regexp.ts';
 
@@ -37,7 +37,7 @@ export class Node {
     this.type = type;
     this.raw = raw;
     this.#tag = tag;
-    this.#attributes = attributes ? new Map(attributes) : undefined;
+    this.#attributes = attributes ? new AttributeMap(attributes) : undefined;
   }
 
   /** Map of HTML attributes */

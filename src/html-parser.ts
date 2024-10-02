@@ -1,5 +1,5 @@
 import {Node} from './html-node.ts';
-import {voidTags, opaqueTags} from './html.ts';
+import {voidTags, opaqueTags} from './html-tags.ts';
 import {anyTag, comment} from './regexp.ts';
 
 /** Regular expression to match HTML comment or tag */

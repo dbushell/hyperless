@@ -1,6 +1,7 @@
+import {AttributeMap} from '../src/attribute-map.ts';
 import {parseAttributes} from '../src/attribute-parser.ts';
 import {anyTag} from '../src/regexp.ts';
-import {assertObjectMatch} from 'jsr:@std/assert';
+import {assertEquals, assertObjectMatch} from 'jsr:@std/assert';
 
 /** Get unparsed attributes from the first HTML tag */
 const getTagAttributes = (html: string): string => {
@@ -109,4 +110,26 @@ Deno.test('mixed', () => {
   const attr = parseAttributes(getTagAttributes(html));
   const actual = Object.fromEntries(attr.entries());
   assertObjectMatch(actual, expected);
+});
+
+Deno.test('entities', () => {
+  const encoded = `&amp;&lt;&gt;&quot;&#39;`;
+  const decoded = `&<>"'`;
+  const entries: {[key: string]: string} = {
+    prop: decoded
+  };
+  let attr = parseAttributes(`prop="${encoded}"`);
+  attr = new AttributeMap(attr);
+  assertEquals(attr.get('prop'), decoded);
+  assertEquals(attr.get('prop', false), encoded);
+  assertEquals(attr.toString(), `prop="${encoded}"`);
+  assertObjectMatch(entries, Object.fromEntries(attr.entries()));
+  assertEquals(Array.from(attr.values()).join(''), decoded);
+  assertEquals(Array.from(attr.values(false)).join(''), encoded);
+  for (const [k, v] of attr) {
+    assertEquals(v, entries[k]);
+  }
+  attr.forEach((v, k) => {
+    assertEquals(entries[k], v);
+  });
 });

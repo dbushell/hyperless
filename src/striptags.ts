@@ -1,4 +1,4 @@
-import {inlineTags} from './html.ts';
+import {inlineTags} from './html-tags.ts';
 import {comment, fullTag, anyTag} from './regexp.ts';
 
 /** Match any remaining HTML comments or tags */
