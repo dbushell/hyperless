@@ -203,9 +203,11 @@ export class Node {
   }
 
   /** Traverse node tree */
-  traverse(callback: (node: Node) => unknown): void {
+  async traverse(callback: (node: Node) => unknown): Promise<void> {
     for (const child of this.#children) {
-      if (callback(child) !== false) child.traverse(callback);
+      if ((await Promise.resolve(callback(child))) !== false) {
+        await child.traverse(callback);
+      }
     }
   }
 
