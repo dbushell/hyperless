@@ -64,7 +64,6 @@ export const opaqueTags: Set<string> = new Set([
   'code',
   'iframe',
   'math',
-  'noscript',
   'object',
   'pre',
   'script',

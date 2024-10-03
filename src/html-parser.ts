@@ -43,7 +43,7 @@ export const parseHTML = (html: string, options = parseOptions): Node => {
       const text = html.substring(0, offset);
       // In RAWTEXT state text is concatenated otherwise append a text node
       if (state === 'RAWTEXT') {
-        parent.raw += text;
+        (parent.at(0) ?? parent).raw += text;
       } else {
         parent.append(new Node(parent, 'TEXT', text));
       }
@@ -77,7 +77,7 @@ export const parseHTML = (html: string, options = parseOptions): Node => {
         parent = parent.parent;
         state = 'DATA';
       } else {
-        parent.raw += tagText;
+        (parent.at(0) ?? parent).raw += tagText;
       }
     }
     // Append comment
@@ -99,6 +99,8 @@ export const parseHTML = (html: string, options = parseOptions): Node => {
     // Append opaque tag and change state
     else if (options.opaqueTags.has(tagName)) {
       const node = new Node(parent, 'OPAQUE', tagText, tagRaw);
+      const text = new Node(node, 'TEXT');
+      node.append(text);
       parent.append(node);
       parent = node;
       state = 'RAWTEXT';

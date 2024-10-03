@@ -13,7 +13,8 @@ export type NodeType =
   | 'TEXT'
   | 'VOID';
 
-const renderTypes = new Set(['ELEMENT', 'VOID']);
+/** Node has open/close tags */
+const renderTypes = new Set(['ELEMENT', 'OPAQUE', 'VOID']);
 
 /**
  * HTML node
@@ -119,7 +120,7 @@ export class Node {
 
   /** Formatted closing tag */
   get tagClose(): string | undefined {
-    if (this.type === 'ELEMENT') {
+    if (renderTypes.has(this.type) && this.type !== 'VOID') {
       return `</${this.tag}>`;
     }
     return undefined;

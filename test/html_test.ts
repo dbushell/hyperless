@@ -82,11 +82,13 @@ Deno.test('opaque state (svg)', () => {
   <rect />
   <circle />
 </svg>`;
-  const html = `<p>Before</p>${svg}<p>After</p>`;
+  const html = `<svg />${svg}<p>After</p>`;
   const root = parseHTML(html);
   assertEquals(root.size, 3);
   assertEquals(root.at(1)!.type, 'OPAQUE');
-  assertEquals(root.at(1)!.raw, svg);
+  assertEquals(root.at(1)!.size, 1);
+  assertEquals(root.at(1)!.at(0)!.type, 'TEXT');
+  assertEquals(root.at(1)!.toString(), svg);
 });
 
 Deno.test('script fake tag', () => {
