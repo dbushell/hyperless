@@ -9,6 +9,12 @@ export const comment = /<!--[\s\S]*?-->/;
 export const tagName = /([a-zA-Z][\w:-]*)/;
 
 /**
+ * Regular expression to match HTML custom element tag name
+ * {@link https://html.spec.whatwg.org/multipage/custom-elements.html#valid-custom-element-name}
+ */
+export const customName = /([a-z][\w]*-[\w]+)/;
+
+/**
  * Regular expression to match HTML open tag
  */
 export const openTag = new RegExp(`<${tagName.source}([^>]*)>`);
