@@ -35,6 +35,95 @@ export const inlineTags: Set<string> = new Set([
   'var',
   'wbr'
 ]);
+/**
+ * Complete list of HTML elements (excluding inline)
+ * {@link https://developer.mozilla.org/en-US/docs/Web/HTML/Element}
+ */
+export const blockTags: Set<string> = new Set([
+  'address',
+  'area',
+  'article',
+  'aside',
+  'audio',
+  'base',
+  'blockquote',
+  'body',
+  'button',
+  'canvas',
+  'caption',
+  'col',
+  'colgroup',
+  'datalist',
+  'dd',
+  'details',
+  'dialog',
+  'div',
+  'dl',
+  'dt',
+  'embed',
+  'fieldset',
+  'figcaption',
+  'figure',
+  'footer',
+  'form',
+  'h1',
+  'h2',
+  'h3',
+  'h4',
+  'h5',
+  'h6',
+  'head',
+  'header',
+  'hgroup',
+  'hr',
+  'html',
+  'iframe',
+  'img',
+  'input',
+  'label',
+  'legend',
+  'li',
+  'link',
+  'main',
+  'map',
+  'menu',
+  'meta',
+  'meter',
+  'nav',
+  'noscript',
+  'object',
+  'ol',
+  'optgroup',
+  'option',
+  'output',
+  'p',
+  'param',
+  'picture',
+  'pre',
+  'progress',
+  'script',
+  'search',
+  'section',
+  'select',
+  'slot',
+  'source',
+  'style',
+  'summary',
+  'svg',
+  'table',
+  'tbody',
+  'td',
+  'template',
+  'textarea',
+  'tfoot',
+  'th',
+  'thead',
+  'title',
+  'tr',
+  'track',
+  'ul',
+  'video'
+]);
 
 /**
  * Complete list of HTML void elements
@@ -55,6 +144,35 @@ export const voidTags: Set<string> = new Set([
   'source',
   'track',
   'wbr'
+]);
+
+/**
+ * Complete list of HTML void elements
+ * {@link https://developer.mozilla.org/en-US/docs/Web/HTML/Element#obsolete_and_deprecated_elements}
+ */
+export const obsoleteTags: Set<string> = new Set([
+  'acronym',
+  'big',
+  'center',
+  'content',
+  'dir',
+  'font',
+  'frame',
+  'frameset',
+  'image',
+  'marquee',
+  'menuitem',
+  'nobr',
+  'noembed',
+  'noframes',
+  'param',
+  'plaintext',
+  'rb',
+  'rtc',
+  'shadow',
+  'strike',
+  'tt',
+  'xmp'
 ]);
 
 /**
