@@ -18,6 +18,19 @@ Deno.test('case-insensitive', () => {
   assertEquals(root.at(0)!.tag, 'article');
 });
 
+Deno.test('custom elements', () => {
+  const html = `<my-element>
+  <my-one>1</my-one>
+  <my-two>2</my-two>
+  <my-three>3</my-three>
+</my-element>`.replace(/\s+/g, '');
+  const root = parseHTML(html);
+  assertEquals(root.at(0)!.tag, 'my-element');
+  assertEquals(root.at(0)!.at(1)!.tag, 'my-two');
+  assertEquals(root.at(0)!.at(1)!.type, 'ELEMENT');
+  assertEquals(root.at(0)!.size, 3);
+});
+
 Deno.test('paragraph inline', () => {
   const html = '<p>This is <strong>inline</strong></p>';
   const root = parseHTML(html);
