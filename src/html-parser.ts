@@ -5,6 +5,9 @@ import {anyTag, comment} from './regexp.ts';
 /** Regular expression to match HTML comment or tag */
 const commentTag = new RegExp(`^${comment.source}|^${anyTag.source}`);
 
+/** List of valid <li> parents */
+const listTags = new Set(['ol', 'ul', 'menu']);
+
 /** HTML parser state */
 type ParseState = 'DATA' | 'RAWTEXT';
 
@@ -107,7 +110,15 @@ export const parseHTML = (html: string, options = parseOptions): Node => {
     }
     // Append opening tag and ascend
     else {
-      const node = new Node(parent, 'ELEMENT', tagText, tagRaw);
+      const node = new Node(null, 'ELEMENT', tagText, tagRaw);
+      // Close unclosed `<li>` if new `<li>` item is found
+      if (
+        node.tag === 'li' &&
+        parent.tag === 'li' &&
+        listTags.has(parent.parent?.tag!)
+      ) {
+        parent = parent.parent!;
+      }
       parent.append(node);
       parent = node;
     }

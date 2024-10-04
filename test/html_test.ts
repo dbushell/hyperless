@@ -64,6 +64,35 @@ Deno.test('leftover text', () => {
   assertEquals(root.at(1)!.raw, 'Leftover');
 });
 
+Deno.test('unclosed <li>', () => {
+  const html = `
+<ul>
+  <li>1<b>b</b>
+  <li>2</li>
+  <li>3
+    <ol>
+      <li>4<i>i</i>
+      <li>5
+    </ol>
+</ul>`.replace(/\s+/g, '');
+  const root = parseHTML(html);
+  assertEquals(root.at(0)!.size, 3);
+  assertEquals(
+    root.toString(),
+    `
+<ul>
+  <li>1<b>b</b></li>
+  <li>2</li>
+  <li>3
+    <ol>
+      <li>4<i>i</i></li>
+      <li>5</li>
+    </ol>
+  </li>
+</ul>`.replace(/\s+/g, '')
+  );
+});
+
 Deno.test('comments', () => {
   const html = `
 <!--
