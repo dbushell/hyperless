@@ -18,8 +18,8 @@ export const escape = (str: string): string =>
 export const unescape = (str: string): string =>
   str.replaceAll(encodedKeys, (k) => encodes.get(k)!);
 
-export const escapeApostrophe = (str: string) =>
+export const escapeApostrophe = (str: string): string =>
   str.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
 
-export const unescapeApostrophe = (str: string) =>
+export const unescapeApostrophe = (str: string): string =>
   str.replace(/\\\\/g, '\\').replace(/\\'/g, "'");
