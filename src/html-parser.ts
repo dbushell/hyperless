@@ -1,5 +1,5 @@
 import {Node} from './html-node.ts';
-import {voidTags, opaqueTags} from './html-tags.ts';
+import {inlineTags, opaqueTags, voidTags} from './html-tags.ts';
 import {anyTag, comment} from './regexp.ts';
 
 /** Regular expression to match HTML comment or tag */
@@ -7,6 +7,13 @@ const commentTag = new RegExp(`^${comment.source}|^${anyTag.source}`);
 
 /** List of valid <li> parents */
 const listTags = new Set(['ol', 'ul', 'menu']);
+
+/** Check if <p> element was not closed */
+const closeParagraph = (nextTag: string, previousTag: string): boolean => {
+  return (
+    nextTag !== 'p' && previousTag === 'p' && inlineTags.has(nextTag) === false
+  );
+};
 
 /** HTML parser state */
 type ParseState = 'DATA' | 'RAWTEXT';
@@ -89,10 +96,18 @@ export const parseHTML = (html: string, options = parseOptions): Node => {
     }
     // Append self-closing and void tags
     else if (options.voidTags.has(tagName) || tagText.endsWith('/>')) {
+      // Close unclosed <p> first
+      if (closeParagraph(tagName, parent.tag)) {
+        parent = parent.parent ?? parent;
+      }
       parent.append(new Node(parent, 'VOID', tagText, tagRaw));
     }
     // Append closing tag and descend
     else if (tagText.startsWith('</')) {
+      // Close unclosed <p> first
+      if (closeParagraph(tagName, parent.tag)) {
+        parent = parent.parent ?? parent;
+      }
       if (parent.parent === null) {
         parent.append(new Node(parent, 'STRAY', tagText, tagRaw));
       } else {
@@ -111,13 +126,20 @@ export const parseHTML = (html: string, options = parseOptions): Node => {
     // Append opening tag and ascend
     else {
       const node = new Node(null, 'ELEMENT', tagText, tagRaw);
-      // Close unclosed `<li>` if new `<li>` item is found
+      // Close unclosed <li> if new <li> item is found
       if (
         node.tag === 'li' &&
         parent.tag === 'li' &&
         listTags.has(parent.parent?.tag!)
       ) {
         parent = parent.parent!;
+      }
+      // Close unclosed <p> before new element
+      if (
+        closeParagraph(tagName, parent.tag) ||
+        (tagName === 'p' && parent.tag === 'p')
+      ) {
+        parent = parent.parent ?? parent;
       }
       parent.append(node);
       parent = node;

@@ -93,6 +93,33 @@ Deno.test('unclosed <li>', () => {
   );
 });
 
+Deno.test('unclosed <p>', () => {
+  const html = `
+<p>Hello, World!
+<custom-element>
+  <p>Closed</p>
+  <p>Unclosed<br><b>bold</b>
+  <p>Unclosed
+</custom-element>
+<p>EOF<hr>
+`.replace(/\s+/g, '');
+  const root = parseHTML(html);
+  assertEquals(root.size, 4);
+  assertEquals(
+    root.toString(),
+    `
+<p>Hello, World!</p>
+<custom-element>
+  <p>Closed</p>
+  <p>Unclosed<br/><b>bold</b></p>
+  <p>Unclosed</p>
+</custom-element>
+<p>EOF</p>
+<hr/>
+`.replace(/\s+/g, '')
+  );
+});
+
 Deno.test('comments', () => {
   const html = `
 <!--
