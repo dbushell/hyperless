@@ -1,6 +1,6 @@
 import {Node} from './html-node.ts';
 import {inlineTags, opaqueTags, voidTags} from './html-tags.ts';
-import {anyTag, comment} from './regexp.ts';
+import {anyTag, comment, customName} from './regexp.ts';
 
 /** Regular expression to match HTML comment or tag */
 const commentTag = new RegExp(`^${comment.source}|^${anyTag.source}`);
@@ -8,25 +8,20 @@ const commentTag = new RegExp(`^${comment.source}|^${anyTag.source}`);
 /** List of valid <li> parents */
 const listTags = new Set(['ol', 'ul', 'menu']);
 
-/** Check if <p> element was not closed */
-const closeParagraph = (nextTag: string, previousTag: string): boolean => {
-  return (
-    nextTag !== 'p' && previousTag === 'p' && inlineTags.has(nextTag) === false
-  );
-};
-
 /** HTML parser state */
 type ParseState = 'DATA' | 'RAWTEXT';
 
 /** `parseHTML` configuration */
 export type ParseOptions = {
   rootTag: string;
+  inlineTags: Set<string>;
   opaqueTags: Set<string>;
   voidTags: Set<string>;
 };
 
 export const getParseOptions = (): ParseOptions => ({
   rootTag: 'html',
+  inlineTags: new Set(inlineTags),
   opaqueTags: new Set(opaqueTags),
   voidTags: new Set(voidTags)
 });
@@ -45,6 +40,16 @@ export const parseHTML = (html: string, options = parseOptions): Node => {
   let state: ParseState = 'DATA';
   // Start at first potential tag
   let offset = html.indexOf('<');
+
+  // Check if <p> element was not closed
+  const closeParagraph = (nextTag: string, previousTag: string): boolean => {
+    if (customName.test(nextTag)) return false;
+    return (
+      nextTag !== 'p' &&
+      previousTag === 'p' &&
+      options.inlineTags.has(nextTag) === false
+    );
+  };
 
   while (offset >= 0 && offset < html.length - 2) {
     // Skip to start of potential tag

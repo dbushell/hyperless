@@ -106,14 +106,20 @@ Deno.test('unclosed <li>', () => {
   );
 });
 
-Deno.test('unclosed <p>', () => {
+Deno.test('unclosed <p> (1)', () => {
+  const html = `<p>1 <my-element /><div />2`;
+  const root = parseHTML(html);
+  assertEquals(root.toString(), '<p>1 <my-element/></p><div/>2');
+});
+
+Deno.test('unclosed <p> (2)', () => {
   const html = `
 <p>Hello, World!
-<custom-element>
+<div>
   <p>Closed</p>
   <p>Unclosed<br><b>bold</b>
   <p>Unclosed
-</custom-element>
+</div>
 <p>EOF<hr>
 `.replace(/\s+/g, '');
   const root = parseHTML(html);
@@ -122,11 +128,11 @@ Deno.test('unclosed <p>', () => {
     root.toString(),
     `
 <p>Hello, World!</p>
-<custom-element>
+<div>
   <p>Closed</p>
   <p>Unclosed<br/><b>bold</b></p>
   <p>Unclosed</p>
-</custom-element>
+</div>
 <p>EOF</p>
 <hr/>
 `.replace(/\s+/g, '')
