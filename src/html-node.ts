@@ -107,9 +107,9 @@ export class Node {
   }
 
   /** Formatted opening tag with parsed attributes */
-  get tagOpen(): string | undefined {
+  get tagOpen(): string {
     if (renderTypes.has(this.type) === false) {
-      return undefined;
+      return '';
     }
     let out = '<' + this.tag;
     const attr = this.attributes.toString();
@@ -119,11 +119,11 @@ export class Node {
   }
 
   /** Formatted closing tag */
-  get tagClose(): string | undefined {
+  get tagClose(): string {
     if (renderTypes.has(this.type) && this.type !== 'VOID') {
       return `</${this.tag}>`;
     }
-    return undefined;
+    return '';
   }
 
   /** Append one or more child nodes */
