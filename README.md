@@ -2,9 +2,31 @@
 
 [![JSR](https://jsr.io/badges/@dbushell/hyperless?labelColor=98e6c8&color=333)](https://jsr.io/@dbushell/hyperless) [![NPM](https://img.shields.io/npm/v/@dbushell/hyperless?labelColor=98e6c8&color=333)](https://www.npmjs.com/package/@dbushell/hyperless)
 
-Remove the “H” from HTML. Hyperless is a lightweight library for converting HTML to plain text quickly. It removes the “ML” too I guess... HTML to text and other useful stuff. That’s the idea.
+HTML parser and various utilities.
 
-## Functions
+## `parseHTML`
+
+Parse an HTML document or fragment into a traversable node tree.
+
+```javascript
+import {parseHTML} from '@dbushell/hyperless';
+const root = parseHTML('<h1>Hello, World!</h1>');
+```
+
+Node API subject to change.
+
+## `parseAttributes`
+
+Parse an HTML attribute string into a case-insensitive deduplicated key/value map.
+
+```javascript
+import {parseAttributes} from '@dbushell/hyperless';
+const map = parseAttributes('a="1" b="2" c d="d" D="d" e=e');
+```
+
+HTML entity encoding is handled automatically by default.
+
+## Utilities
 
 ### `stripTags`
 
@@ -17,17 +39,6 @@ const text = stripTags('<p>Ceci n’est pas une paragraphe.</p>');
 ```
 
 Text in `<blockquote>` and `<q>` are wrapped in quotation marks.
-
-### `parseAttributes`
-
-Parse an HTML attribute string into a case-insensitive deduplicated key/value map.
-
-```javascript
-import {parseAttributes} from '@dbushell/hyperless';
-const map = parseAttributes('a="1" b="2" c d="d" D="d"');
-```
-
-HTML entity encoding is handled automatically by default.
 
 ### `excerpt`
 
