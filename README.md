@@ -54,10 +54,6 @@ Output is context aware trimmed to the nearest sentence, or word, to fit the max
 
 An optional `maxLength` can be passed as the second argument (default: `300` characters).
 
-## Other Exports
-
-Any exports not documented above are considered unstable and subject to change or removal. Unless I do a `1.0` release that is true for everything, to be honest.
-
 * * *
 
 [MIT License](/LICENSE) | Copyright © 2024 [David Bushell](https://dbushell.com)

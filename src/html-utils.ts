@@ -12,14 +12,18 @@ const entityKeys = new RegExp(`${[...entities.keys()].join('|')}`, 'g');
 
 const encodedKeys = new RegExp(`${[...encodes.keys()].join('|')}`, 'g');
 
+/** Escape HTML entities */
 export const escape = (str: string): string =>
   str.replaceAll(entityKeys, (k) => entities.get(k)!);
 
+/** Unescape HTML entities */
 export const unescape = (str: string): string =>
   str.replaceAll(encodedKeys, (k) => encodes.get(k)!);
 
-export const escapeApostrophe = (str: string): string =>
-  str.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+/** Escape single character */
+export const escapeChar = (str: string, char = "'"): string =>
+  str.replace(/\\/g, '\\\\').replaceAll(char, '\\' + char);
 
-export const unescapeApostrophe = (str: string): string =>
-  str.replace(/\\\\/g, '\\').replace(/\\'/g, "'");
+/** Unescape single character */
+export const unescapeChar = (str: string, char = "'"): string =>
+  str.replace(/\\\\/g, '\\').replaceAll('\\' + char, char);
