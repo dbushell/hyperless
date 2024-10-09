@@ -19,11 +19,3 @@ export const escape = (str: string): string =>
 /** Unescape HTML entities */
 export const unescape = (str: string): string =>
   str.replaceAll(encodedKeys, (k) => encodes.get(k)!);
-
-/** Escape single character */
-export const escapeChar = (str: string, char = "'"): string =>
-  str.replace(/\\/g, '\\\\').replaceAll(char, '\\' + char);
-
-/** Unescape single character */
-export const unescapeChar = (str: string, char = "'"): string =>
-  str.replace(/\\\\/g, '\\').replaceAll('\\' + char, char);
