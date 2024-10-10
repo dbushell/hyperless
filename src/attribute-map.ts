@@ -15,37 +15,39 @@ export class AttributeMap extends Map<string, string> {
         : iterable
     );
   }
-  [Symbol.iterator](): IterableIterator<[string, string]> {
+  override [Symbol.iterator](): MapIterator<[string, string]> {
     return this.entries();
   }
-  set(key: string, value: string): this {
+  override set(key: string, value: string): this {
     value = escape(unescape(value));
     return super.set(key.toLowerCase(), value);
   }
-  get(key: string, decode = true): string | undefined {
+  override get(key: string, decode = true): string | undefined {
     const value = super.get(key.toLowerCase());
     if (value === undefined) return value;
     return decode ? unescape(value) : value;
   }
-  has(key: string): boolean {
+  override has(key: string): boolean {
     return super.has(key.toLowerCase());
   }
-  delete(key: string): boolean {
+  override delete(key: string): boolean {
     return super.delete(key.toLowerCase());
   }
-  entries(decode = true): IterableIterator<[string, string]> {
+  override entries(decode = true): MapIterator<[string, string]> {
     const entries = super.entries();
     return (function* () {
       for (const [k, v] of entries) yield [k, decode ? unescape(v) : v];
+      return undefined;
     })();
   }
-  values(decode = true): IterableIterator<string> {
+  override values(decode = true): MapIterator<string> {
     const values = super.values();
     return (function* () {
       for (const v of values) yield decode ? unescape(v) : v;
+      return undefined;
     })();
   }
-  forEach(
+  override forEach(
     callbackfn: (value: string, key: string, map: Map<string, string>) => void,
     thisArg?: unknown
   ): void {
@@ -53,7 +55,7 @@ export class AttributeMap extends Map<string, string> {
       callbackfn.call(thisArg, unescape(value), key, map)
     );
   }
-  toString(): string {
+  override toString(): string {
     const entries = Array.from(super.entries());
     const attr = entries.map(([k, v]) =>
       v === '' ? k : v.indexOf('"') === -1 ? `${k}="${v}"` : `${k}='${v}'`
