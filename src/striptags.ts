@@ -1,22 +1,22 @@
-import {inlineTags} from './html-tags.ts';
-import {comment, fullTag, anyTag} from './regexp.ts';
+import { inlineTags } from "./html-tags.ts";
+import { anyTag, comment, fullTag } from "./regexp.ts";
 
 /** Match any remaining HTML comments or tags */
 const otherTags = new RegExp(`${comment.source}|${anyTag.source}`);
 
 /** Bespoke list of elements to remove with their content */
 const removeTags = new Set([
-  'audio',
-  'canvas',
-  'figure',
-  'form',
-  'iframe',
-  'picture',
-  'pre',
-  'script',
-  'style',
-  'table',
-  'video'
+  "audio",
+  "canvas",
+  "figure",
+  "form",
+  "iframe",
+  "picture",
+  "pre",
+  "script",
+  "style",
+  "table",
+  "video",
 ]);
 
 /**
@@ -32,25 +32,25 @@ export const stripTags = (html: string, depth = 0): string => {
   // Find open and close tags
   let match: RegExpMatchArray | null;
   while ((match = html.match(fullTag))) {
-    let {0: search, 2: tag, 3: text} = match;
+    let { 0: search, 2: tag, 3: text } = match;
     // Remove entire element
     if (removeTags.has(tag)) {
-      html = html.replace(search, () => '');
+      html = html.replace(search, () => "");
       continue;
     }
     // Wrap quote in alternating typographic style
-    if (['blockquote', 'q'].includes(tag)) {
-      const quotes = depth % 2 ? '‘’' : '“”';
+    if (["blockquote", "q"].includes(tag)) {
+      const quotes = depth % 2 ? "‘’" : "“”";
       const innerText = stripTags(text, depth + 1).trim();
       text = quotes[0] + innerText + quotes[1];
     }
     // Remove tags and keep content
     const inline = inlineTags.has(tag);
-    html = html.replace(search, () => text + (inline ? '' : ' '));
+    html = html.replace(search, () => text + (inline ? "" : " "));
   }
   // Remove everthing else
   while ((match = html.match(otherTags))) {
-    html = html.replace(match[0], () => '');
+    html = html.replace(match[0], () => "");
   }
   return html;
 };

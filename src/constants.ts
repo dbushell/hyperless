@@ -3,11 +3,11 @@
  * {@link https://infra.spec.whatwg.org/#ascii-whitespace}
  */
 export const ASCII_WHITESPACE = new Set([
-  '\t', // U+0009 TAB
-  '\n', // U+000A LF (Line Feed)
-  '\f', // U+000C FF (Form Feed)
-  '\r', // U+000D CR (Carriage Return)
-  ' ' // U+0020 SPACE
+  "\t", // U+0009 TAB
+  "\n", // U+000A LF (Line Feed)
+  "\f", // U+000C FF (Form Feed)
+  "\r", // U+000D CR (Carriage Return)
+  " ", // U+0020 SPACE
 ]);
 
 /**
@@ -36,10 +36,10 @@ export const INVALID_ATTRIBUTE_NAME = new Set(CONTROLS);
 [
   '"', // U+0022 Quotation Mark
   "'", // U+0027 Apostrophe
-  '=', // U+003D Equals Sign
-  '>', // U+003C Less-Than Sign
-  '<', // U+003E Greater-Than Sign
-  '/' // U+002F Solidus
+  "=", // U+003D Equals Sign
+  ">", // U+003C Less-Than Sign
+  "<", // U+003E Greater-Than Sign
+  "/", // U+002F Solidus
 ].forEach((char) => INVALID_ATTRIBUTE_NAME.add(char));
 
 /**
@@ -48,5 +48,5 @@ export const INVALID_ATTRIBUTE_NAME = new Set(CONTROLS);
  */
 export const INVALID_ATTRIBUTE_VALUE = new Set(INVALID_ATTRIBUTE_NAME);
 [
-  '`' // U+0060 Grave Accent
+  "`", // U+0060 Grave Accent
 ].forEach((char) => INVALID_ATTRIBUTE_VALUE.add(char));

@@ -1,4 +1,4 @@
-import {stripTags} from './striptags.ts';
+import { stripTags } from "./striptags.ts";
 
 /**
  * Generate a text excerpt from HTML content.
@@ -14,8 +14,8 @@ import {stripTags} from './striptags.ts';
 export const excerpt = (
   html: string,
   maxLength = 300,
-  trunateSuffix = '[…]',
-  endChars = ['.', '!', '?']
+  trunateSuffix = "[…]",
+  endChars = [".", "!", "?"],
 ): string => {
   // Remove HTML
   const text = stripTags(html);
@@ -31,11 +31,11 @@ export const excerpt = (
     const excerpt = text.substring(0, offsets.at(-1)! + 1);
     // Ensure excerpt is not too short
     if (maxLength - excerpt.length < maxLength * 0.2) {
-      return (excerpt + ' ' + trunateSuffix).trim();
+      return (excerpt + " " + trunateSuffix).trim();
     }
   }
   // Fallback to using words
-  let excerpt = '';
+  let excerpt = "";
   const words = text.split(/\s+/);
   while (words.length) {
     // Concatenate words until maximum length is reached
@@ -43,7 +43,7 @@ export const excerpt = (
     if (excerpt.length + word.length > maxLength) {
       break;
     }
-    excerpt += word + ' ';
+    excerpt += word + " ";
   }
   return (excerpt + trunateSuffix).trim();
 };

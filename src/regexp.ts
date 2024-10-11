@@ -39,4 +39,4 @@ export const anyTag = new RegExp(`</?${tagName.source}([^>]*)/?>`);
  * Regular expression to match full tag with inner content
  * This is non-greedy and cannot handle nested tags of the same name
  */
-export const fullTag = new RegExp(`(<${tagName.source}[^>]*>)(.*?)</\\2>`, 's');
+export const fullTag = new RegExp(`(<${tagName.source}[^>]*>)(.*?)</\\2>`, "s");

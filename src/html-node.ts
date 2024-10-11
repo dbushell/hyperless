@@ -1,20 +1,20 @@
-import {AttributeMap} from './attribute-map.ts';
-import {parseAttributes} from './attribute-parser.ts';
-import {anyTag} from './regexp.ts';
+import { AttributeMap } from "./attribute-map.ts";
+import { parseAttributes } from "./attribute-parser.ts";
+import { anyTag } from "./regexp.ts";
 
 /** Node.type values */
 export type NodeType =
-  | 'COMMENT'
-  | 'ELEMENT'
-  | 'INVISIBLE'
-  | 'OPAQUE'
-  | 'ROOT'
-  | 'STRAY'
-  | 'TEXT'
-  | 'VOID';
+  | "COMMENT"
+  | "ELEMENT"
+  | "INVISIBLE"
+  | "OPAQUE"
+  | "ROOT"
+  | "STRAY"
+  | "TEXT"
+  | "VOID";
 
 /** Node has open/close tags */
-const renderTypes = new Set(['ELEMENT', 'OPAQUE', 'VOID']);
+const renderTypes = new Set(["ELEMENT", "OPAQUE", "VOID"]);
 
 /**
  * HTML node
@@ -29,10 +29,10 @@ export class Node {
 
   constructor(
     parent: Node | null = null,
-    type: NodeType = 'TEXT',
-    raw = '',
-    tag = '',
-    attributes?: AttributeMap
+    type: NodeType = "TEXT",
+    raw = "",
+    tag = "",
+    attributes?: AttributeMap,
   ) {
     parent?.append(this);
     this.type = type;
@@ -45,8 +45,8 @@ export class Node {
   get attributes(): AttributeMap {
     // Parse on first request for performance
     if (this.#attributes === undefined) {
-      const match = this.raw.match(new RegExp(anyTag.source, 's'));
-      this.#attributes = parseAttributes(match?.[2] ?? '');
+      const match = this.raw.match(new RegExp(anyTag.source, "s"));
+      this.#attributes = parseAttributes(match?.[2] ?? "");
     }
     return this.#attributes;
   }
@@ -80,7 +80,7 @@ export class Node {
     let depth = 0;
     let parent = this.parent;
     while (parent) {
-      if (parent.type !== 'INVISIBLE') depth++;
+      if (parent.type !== "INVISIBLE") depth++;
       parent = parent.parent;
     }
     return depth;
@@ -109,21 +109,21 @@ export class Node {
   /** Formatted opening tag with parsed attributes */
   get tagOpen(): string {
     if (renderTypes.has(this.type) === false) {
-      return '';
+      return "";
     }
-    let out = '<' + this.tag;
+    let out = "<" + this.tag;
     const attr = this.attributes.toString();
-    if (attr.length) out += ' ' + attr;
-    if (this.type === 'VOID') out += '/';
-    return out + '>';
+    if (attr.length) out += " " + attr;
+    if (this.type === "VOID") out += "/";
+    return out + ">";
   }
 
   /** Formatted closing tag */
   get tagClose(): string {
-    if (renderTypes.has(this.type) && this.type !== 'VOID') {
+    if (renderTypes.has(this.type) && this.type !== "VOID") {
       return `</${this.tag}>`;
     }
-    return '';
+    return "";
   }
 
   /** Append one or more child nodes */
@@ -148,7 +148,7 @@ export class Node {
       this.type,
       this.raw,
       this.#tag,
-      this.#attributes
+      this.#attributes,
     );
     if (deep) {
       for (const child of this.children) {
@@ -231,13 +231,13 @@ export class Node {
 
   /** Render node to HTML string */
   toString(): string {
-    if (this.type === 'COMMENT') return '';
-    if (this.type === 'STRAY') return '';
+    if (this.type === "COMMENT") return "";
+    if (this.type === "STRAY") return "";
     let out = this.tagOpen || this.raw;
     for (const node of this.#children) {
       out += node.toString();
     }
-    out += this.tagClose ?? '';
+    out += this.tagClose ?? "";
     return out;
   }
 }

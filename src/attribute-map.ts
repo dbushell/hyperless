@@ -1,4 +1,4 @@
-import {escape, unescape} from './html-utils.ts';
+import { escape, unescape } from "./html-utils.ts";
 
 /**
  * HTML attributes map
@@ -7,12 +7,12 @@ import {escape, unescape} from './html-utils.ts';
  */
 export class AttributeMap extends Map<string, string> {
   constructor(
-    iterable?: Iterable<readonly [string, string]> | null | undefined
+    iterable?: Iterable<readonly [string, string]> | null | undefined,
   ) {
     super(
       iterable instanceof AttributeMap
         ? Array.from(iterable, ([k, v]) => [k, escape(v)])
-        : iterable
+        : iterable,
     );
   }
   override [Symbol.iterator](): MapIterator<[string, string]> {
@@ -49,7 +49,7 @@ export class AttributeMap extends Map<string, string> {
   }
   override forEach(
     callbackfn: (value: string, key: string, map: Map<string, string>) => void,
-    thisArg?: unknown
+    thisArg?: unknown,
   ): void {
     super.forEach((value, key, map) =>
       callbackfn.call(thisArg, unescape(value), key, map)
@@ -58,8 +58,8 @@ export class AttributeMap extends Map<string, string> {
   override toString(): string {
     const entries = Array.from(super.entries());
     const attr = entries.map(([k, v]) =>
-      v === '' ? k : v.indexOf('"') === -1 ? `${k}="${v}"` : `${k}='${v}'`
+      v === "" ? k : v.indexOf('"') === -1 ? `${k}="${v}"` : `${k}='${v}'`
     );
-    return attr.join(' ');
+    return attr.join(" ");
   }
 }
