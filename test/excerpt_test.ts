@@ -3,7 +3,7 @@ import { assertEquals } from "jsr:@std/assert";
 
 Deno.test("short", () => {
   const html = "<p>Ceci n’est pas une paragraphe.</p>";
-  const expected = "Ceci n’est pas une paragraphe. ";
+  const expected = "Ceci n’est pas une paragraphe.";
   const text = excerpt(html);
   assertEquals(text, expected);
 });

@@ -1,8 +1,9 @@
+import { Node } from "./html-node.ts";
+import { parseHTML } from "./html-parser.ts";
 import { inlineTags } from "./html-tags.ts";
-import { anyTag, comment, fullTag } from "./regexp.ts";
 
-/** Match any remaining HTML comments or tags */
-const otherTags = new RegExp(`${comment.source}|${anyTag.source}`);
+/** Elements to wrap in quotation marks */
+const quoteTags = new Set(["blockquote", "q"]);
 
 /** Bespoke list of elements to remove with their content */
 const removeTags = new Set([
@@ -24,33 +25,42 @@ const removeTags = new Set([
  *
  * Text in `<blockquote>` and `<q>` are wrapped in quotation marks.
  *
- * @param html  Original HTML content
- * @param depth Recursive count (for internal use)
+ * @param html  Original HTML content (or parsed Node)
+ * @param style Starting quotation style
  * @returns Text with HTML removed
  */
-export const stripTags = (html: string, depth = 0): string => {
-  // Find open and close tags
-  let match: RegExpMatchArray | null;
-  while ((match = html.match(fullTag))) {
-    let { 0: search, 2: tag, 3: text } = match;
-    // Remove entire element
-    if (removeTags.has(tag)) {
-      html = html.replace(search, () => "");
-      continue;
-    }
-    // Wrap quote in alternating typographic style
-    if (["blockquote", "q"].includes(tag)) {
-      const quotes = depth % 2 ? "‘’" : "“”";
-      const innerText = stripTags(text, depth + 1).trim();
-      text = quotes[0] + innerText + quotes[1];
-    }
-    // Remove tags and keep content
-    const inline = inlineTags.has(tag);
-    html = html.replace(search, () => text + (inline ? "" : " "));
+export const stripTags = (
+  node: string | Node,
+  style = 0,
+  trim = true,
+): string => {
+  // Parse HTML and loop back
+  if (typeof node === "string") {
+    return stripTags(parseHTML(node));
   }
-  // Remove everthing else
-  while ((match = html.match(otherTags))) {
-    html = html.replace(match[0], () => "");
+  // Return text
+  if (node.type === "TEXT") {
+    return node.raw;
   }
-  return html;
+  // Empty these tags
+  if (removeTags.has(node.tag)) {
+    return " ";
+  }
+  // Wrap quote in alternating typographic style
+  if (quoteTags.has(node.tag)) {
+    const quotes = style % 2 ? "‘’" : "“”";
+    const empty = new Node(null, "ROOT");
+    empty.append(...node.children);
+    return quotes[0] + stripTags(empty, style + 1, true) + quotes[1];
+  }
+  // Render children
+  let out = "";
+  for (const child of node.children) {
+    out += stripTags(child, style, false);
+  }
+  // Ensure space between blocks
+  if (inlineTags.has(node.tag) === false) out += " ";
+  // Remove excess whitespace
+  if (trim) return out.replace(/\s+/g, " ").trim();
+  return out;
 };
