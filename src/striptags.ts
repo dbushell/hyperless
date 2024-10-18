@@ -36,7 +36,7 @@ export const stripTags = (
 ): string => {
   // Parse HTML and loop back
   if (typeof node === "string") {
-    return stripTags(parseHTML(node));
+    return stripTags(parseHTML(node), style, trim);
   }
   // Return text
   if (node.type === "TEXT") {
